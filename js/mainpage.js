@@ -92,12 +92,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (value === null || value === undefined || value === '') {
       return '';
     }
-    const cleanNumString = String(value).replace(/[^0-9.]/g, '');
+    // Preserve negative values by keeping the minus sign
+    const cleanNumString = String(value).replace(/[^0-9.-]/g, '');
     const num = parseFloat(cleanNumString);
     if (isNaN(num)) {
       return '';
     }
-    return `$${num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    const absVal = Math.abs(num).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return (num < 0 ? '-$' : '$') + absVal;
   }
 
   // Parses a formatted currency string back to a number
@@ -115,7 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (value === null || value === undefined || value === '') {
       return '';
     }
-    const num = parseFloat(String(value).replace(/[^0-9.]/g, ''));
+    // Allow negative percentages by retaining the minus sign
+    const num = parseFloat(String(value).replace(/[^0-9.-]/g, ''));
     if (isNaN(num)) {
       return '';
     }
