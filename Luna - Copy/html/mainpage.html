@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Luna</title>
+  <link rel="stylesheet" href="../css/mainpage.css">
+</head>
+<body>
+  <div id="mainMenuPage" class="page-container">
+    <div class="main-menu-header">
+      <h1 id="lunaTitle">Luna</h1>
+      <button id="openSettingsButton" class="icon-button settings-icon">⚙️</button>
+    </div>
+    <div class="menu-options">
+      <button id="openQuoteCalculator" class="menu-button">Quote Calculator</button>
+      <button id="openRecordLogButton" class="menu-button">📋 Record Log</button>
+      </div>
+  </div>
+
+  <div id="quoteCalculatorPage" class="page-container hidden">
+    <div class="calculator-header">
+      <h1>Quote Calculator</h1>
+      <button id="backToMenu" class="back-button">← Back</button>
+    </div>
+
+    <div id="companyNameGroup" class="input-group">
+      <label for="companyNameInput">Company Name:</label>
+      <input type="text" id="companyNameInput">
+    </div>
+
+    <div id="erpLinkGroup" class="input-group hidden advanced-mode-item">
+      <label for="erpLinkInput">ERP Link:</label>
+      <input type="text" id="erpLinkInput">
+    </div>
+
+    <div class="input-group">
+      <label for="lastYearPrice">Last Year Price ($):</label>
+      <input type="text" id="lastYearPrice" inputmode="decimal">
+    </div>
+
+    <div class="input-group">
+      <label for="msrpTotal">MSRP Total (No Discounts & No Integrations) ($):</label>
+      <input type="text" id="msrpTotal" inputmode="decimal">
+    </div>
+
+    <div class="input-group">
+      <label>Integrations:</label>
+      <div class="toggle-buttons">
+        <button id="integrationsYes" class="toggle-button" data-value="yes">Yes</button>
+        <button id="integrationsNo" class="toggle-button selected" data-value="no">No</button>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Discount or Increase?</label>
+      <div class="toggle-buttons">
+        <button id="discountBtn" class="toggle-button" data-value="discount">Discount</button>
+        <button id="increaseBtn" class="toggle-button" data-value="increase">Increase</button>
+        <button id="noneBtn" class="toggle-button selected" data-value="none">None</button>
+      </div>
+    </div>
+
+    <div id="discountFields" class="conditional-fields hidden">
+      <label for="discountPercentage">Discount Percentage (%):</label>
+      <input type="text" id="discountPercentage" value="0" inputmode="decimal">
+    </div>
+
+    <div id="increaseFields" class="conditional-fields hidden">
+      <label for="increasePercentage">Increase Percentage (%):</label>
+      <input type="text" id="increasePercentage" value="5.00%" inputmode="decimal">
+    </div>
+
+    <hr class="divider">
+
+    <div id="integrationsCostDisplay" class="display-box hidden">
+      <span class="display-label">Integrations Cost:</span>
+      <span class="display-value" id="integrationsCostValue">$0.00</span>
+    </div>
+
+    <div id="discountForErpDisplay" class="display-box hidden">
+      <span class="display-label">Discount for ERP:</span>
+      <span class="display-value" id="discountForErpValue">$0.00</span>
+    </div>
+
+    <div id="totalEndPriceDisplay" class="display-box hidden">
+      <span class="display-label">Total End Price:</span>
+      <span class="display-value" id="totalEndPriceValue">$0.00</span>
+    </div>
+
+    <hr class="divider">
+
+    <div class="input-group">
+      <label for="notesInput">Notes:</label>
+      <textarea id="notesInput" rows="3" placeholder="Add any relevant notes here..."></textarea>
+    </div>
+
+  </div>
+
+  <div id="settingsPage" class="page-container hidden">
+    <div class="calculator-header">
+      <h1>Settings</h1>
+      <button id="backToMenuFromSettings" class="back-button">← Back</button>
+    </div>
+
+    <div class="settings-group">
+      <label>Magnification:</label>
+      <div class="magnification-options">
+        <input type="range" id="zoomSlider" min="0.75" max="1.5" step="0.05" value="1.0">
+        <span id="zoomValueDisplay">100%</span>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <label>Luna Title Visibility</label>
+      <div class="toggle-buttons">
+        <button id="lunaTitleVisible" class="toggle-button selected" data-value="visible">Visible</button>
+        <button id="lunaTitleHidden" class="toggle-button" data-value="hidden">Hidden</button>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <label>Advanced Mode</label>
+      <div class="toggle-buttons">
+        <button id="advancedModeEnabledBtn" class="toggle-button" data-value="enabled">On</button>
+        <button id="advancedModeDisabledBtn" class="toggle-button selected" data-value="disabled">Off</button>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <label>Theme Selection</label>
+      <div class="theme-buttons-container">
+        <button class="theme-button selected" data-theme="purple"></button>
+        <button class="theme-button" data-theme="blue"></button>
+        <button class="theme-button" data-theme="green"></button>
+        <button class="theme-button" data-theme="pink"></button>
+        <button class="theme-button" data-theme="orange"></button>
+        <button class="theme-button" data-theme="red"></button>
+        <button class="theme-button" data-theme="yellow"></button>
+        <button class="theme-button" data-theme="white"></button>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <button id="resetAllButton" class="menu-button reset-button">Reset All Settings & Data</button>
+    </div>
+
+  </div>
+
+  <div id="recordLogPage" class="page-container hidden">
+    <div class="calculator-header">
+      <h1>Record Log</h1>
+      <button id="backToMenuFromRecordLog" class="back-button">← Back</button>
+    </div>
+    <div id="recordLogList" class="record-log-list">
+      <p class="empty-log-message">No records saved yet.</p>
+    </div>
+  </div>
+
+  <div id="calculatorFooter" class="calculator-footer-bar hidden">
+    <button id="clearAllBtn" class="footer-button clear-button">🗑️ Clear All</button>
+    <button id="completeBtn" class="footer-button complete-button">💾 Complete</button>
+  </div>
+
+  <div id="recordLogFooter" class="calculator-footer-bar hidden">
+    <button id="downloadAllRecordsBtn" class="footer-button download-all-button">⬇️ Download All Records</button>
+  </div>
+
+  <script src="../js/mainpage.js"></script>
+</body>
+</html>
