@@ -15,6 +15,11 @@
   --display-box-border: 1px solid #555;
   --display-box-text: #a0c4ff; /* Accent color for displayed values */
 
+  /* Card styles */
+  --card-bg: #2b2b2b;
+  --card-border: 1px solid #444;
+  --card-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
   --footer-height: 55px; /* Adjust as needed */
 
   /* Fixed button colors */
@@ -108,6 +113,10 @@ body.theme-white {
   --display-box-border: 1px solid #ccc;
   --display-box-text: #007bff; /* A consistent blue for highlight text in light mode */
 
+  --card-bg: #ffffff; /* White cards in light mode */
+  --card-border: 1px solid #ccc;
+  --card-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
   --purple-accent: #6a95e0; /* Blue accent for light theme */
   --purple-accent-hover: #5680cb;
   --purple-accent-active: #4a6fa8;
@@ -145,6 +154,17 @@ body {
   display: none !important;
 }
 
+/* --- Card Style (New Base for many elements) --- */
+.card {
+  background-color: var(--card-bg);
+  border: var(--card-border);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px; /* Space between cards */
+  box-shadow: var(--card-box-shadow);
+}
+
+
 /* --- Main Menu Specific Styles --- */
 #mainMenuPage {
   display: flex;
@@ -157,22 +177,26 @@ body {
   padding-top: 20px;
 }
 
+/* Updated Main Menu Header Style */
 .main-menu-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-bottom: 30px;
+  margin-bottom: 20px; /* Adjusted margin-bottom */
+  padding-bottom: 10px; /* Added padding-bottom */
+  border-bottom: 1px solid var(--dark-border); /* Added border-bottom */
 }
 
 .main-menu-header h1 {
-  font-size: 3.5em;
+  font-size: 1.8em; /* Adjusted font size to be more inline with other headers */
   color: var(--purple-accent);
   margin: 0;
   line-height: 1;
-  flex-grow: 1;
-  text-align: center;
+  flex-grow: 0; /* Allow title to take only necessary space */
+  text-align: left; /* Align title to the left */
   transition: opacity 0.3s ease;
+  padding-right: 10px; /* Add some space between title and icon */
 }
 
 .main-menu-header h1.hidden-title {
@@ -202,19 +226,19 @@ body {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  max-width: 200px;
+  max-width: 250px; /* Slightly wider buttons */
   width: 100%;
 }
 
 .menu-button {
   background-color: var(--purple-accent);
   color: var(--text-light);
-  padding: 12px 15px;
-  font-size: 1.1em;
+  padding: 15px 20px; /* Increased padding */
+  font-size: 1.2em; /* Slightly larger font */
   border: none;
-  border-radius: 6px;
+  border-radius: 8px; /* More rounded corners */
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; /* Added box-shadow transition */
   width: 100%;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -222,6 +246,7 @@ body {
 .menu-button:hover {
   background-color: var(--purple-accent-hover);
   transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Increased shadow on hover */
 }
 
 .menu-button:active {
@@ -246,6 +271,7 @@ body {
 
 
 /* --- Calculator Specific Styles --- */
+/* These styles are intentionally kept from the previous version as per instructions */
 .calculator-header {
   display: flex;
   align-items: center;
@@ -290,7 +316,8 @@ body {
 }
 
 .input-group input[type="text"],
-.input-group input[type="number"] {
+.input-group input[type="number"],
+.input-group textarea { /* Added textarea */
   background-color: var(--dark-secondary-bg);
   border: 1px solid var(--dark-border);
   color: var(--text-light);
@@ -298,14 +325,18 @@ body {
   border-radius: 4px;
   font-size: 1em;
   width: calc(100% - 16px);
+  box-sizing: border-box; /* Ensure padding is included in width */
+  resize: vertical; /* Allow vertical resizing for textarea */
 }
 
 .input-group input[type="text"]:focus,
-.input-group input[type="number"]:focus {
+.input-group input[type="number"]:focus,
+.input-group textarea:focus { /* Added textarea */
   outline: none;
   border-color: var(--highlight-blue);
   box-shadow: 0 0 0 2px rgba(106, 149, 224, 0.3);
 }
+
 
 /* Common styles for button sections (Integrations, Discount/Increase) */
 .integrations-section,
@@ -401,9 +432,14 @@ body {
 }
 
 .settings-group {
-  margin-top: 15px;
-  margin-bottom: 20px;
+  margin-top: 0; /* Remove top margin as card provides spacing */
+  margin-bottom: 15px; /* Use card spacing */
 }
+
+.settings-group:first-child {
+    margin-top: 15px; /* Add back some top margin for the first card */
+}
+
 
 .settings-group label {
   display: block;
@@ -424,52 +460,44 @@ body {
   box-sizing: border-box;
 }
 
+/* Modern Slider Styling */
 #zoomSlider {
-  -webkit-appearance: none; /* Remove default styling for Chrome */
-  width: 90%; /* Adjust width as needed */
-  height: 8px; /* Thickness of the track */
-  border-radius: 5px;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 90%;
+  height: 8px;
+  border-radius: 4px; /* Slightly less rounded track */
+  background: var(--dark-secondary-bg); /* Solid background color */
   outline: none;
-  opacity: 0.8;
-  transition: opacity .2s;
-
-  /* Custom track background with dashed lines */
-  background:
-    var(--dark-secondary-bg) /* Base track color */
-    repeating-linear-gradient(
-      to right,
-      var(--dark-border) 0, /* Start of dash */
-      var(--dark-border) 1px, /* End of dash (dash width) */
-      transparent 1px, /* Start of transparent gap */
-      transparent calc(100% / 8) /* End of transparent gap, repeat every 1/8th of total range */
-    );
-  background-size: 100% 100%; /* Ensure gradient covers full track */
-  background-repeat: no-repeat;
-  background-position: center; /* Center the gradient */
-}
-
-#zoomSlider:hover {
-  opacity: 1;
+  opacity: 1; /* Always fully opaque */
+  transition: background-color 0.2s ease; /* Smooth transition on hover */
 }
 
 /* Style the slider thumb (the draggable part) */
 #zoomSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px; /* Size of the thumb */
-  height: 20px; /* Size of the thumb */
-  border-radius: 50%; /* Make it a circle */
-  background: var(--purple-accent); /* Thumb color */
+  width: 20px;
+  height: 20px;
+  border-radius: 50%; /* Keep it a circle */
+  background: var(--purple-accent); /* Thumb color from theme accent */
   cursor: grab;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  margin-top: -6px; /* Adjust to center vertically on the track */
-  border: 1px solid var(--purple-accent-hover); /* Small border for definition */
+  margin-top: -6px;
+  border: 2px solid var(--dark-bg); /* Border from background color */
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+#zoomSlider:hover::-webkit-slider-thumb {
+  background: var(--purple-accent-hover);
+  border-color: var(--dark-secondary-bg); /* Border from secondary background */
 }
 
 #zoomSlider::-webkit-slider-thumb:active {
   cursor: grabbing;
   background: var(--purple-accent-active);
 }
+
 
 #zoomValueDisplay {
   font-size: 1.1em;
@@ -631,14 +659,16 @@ body {
 }
 
 .record-item {
-  background-color: var(--dark-secondary-bg);
-  border: 1px solid var(--dark-border);
+  /* Inherits card styles */
+  background-color: var(--card-bg);
+  border: var(--card-border);
   border-radius: 8px;
-  padding: 10px 15px;
+  padding: 10px 15px; /* Slightly less padding than a full card */
   display: flex;
   flex-direction: column;
   gap: 5px;
   font-size: 0.9em;
+  box-shadow: var(--card-box-shadow); /* Apply card shadow */
 }
 
 .record-item-header {

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Luna",
   "version": "1.0",
-  "description": "Edge extension with a sidebar panel and a button.",
+  "description": "Personal Assistant for Quote Calculation",
   "permissions": [
     "storage",  
     "sidePanel"
@@ -13,14 +13,10 @@
   "action": {
     "default_title": "Open Luna sidebar",
     "default_icon": {
-      "16": "icons/icon.png",
-      "48": "icons/icon.png",
       "128": "icons/icon.png"
     }
   },
   "icons": {
-    "16": "icons/icon.png",
-    "48": "icons/icon.png",
     "128": "icons/icon.png"
   },
   "side_panel": {

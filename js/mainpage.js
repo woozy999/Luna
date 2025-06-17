@@ -12,8 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const companyNameInput = document.getElementById('companyNameInput');
   const erpLinkGroup = document.getElementById('erpLinkGroup');
   const erpLinkInput = document.getElementById('erpLinkInput');
-  const integrationsRateGroup = document.getElementById('integrationsRateGroup'); // NEW
-  const integrationsRateInput = document.getElementById('integrationsRateInput'); // NEW
+  // REMOVED: Integrations Rate Group and Input
+  // const integrationsRateGroup = document.getElementById('integrationsRateGroup'); // NEW
+  // const integrationsRateInput = document.getElementById('integrationsRateInput'); // NEW
   const lastYearPriceInput = document.getElementById('lastYearPrice');
   const msrpTotalInput = document.getElementById('msrpTotal');
   const integrationsYesButton = document.getElementById('integrationsYes');
@@ -32,6 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const discountForErpValue = document.getElementById('discountForErpValue');
   const totalEndPriceDisplay = document.getElementById('totalEndPriceDisplay');
   const totalEndPriceValue = document.getElementById('totalEndPriceValue');
+
+  // NEW: Notes Input
+  const notesInput = document.getElementById('notesInput');
+
 
   const settingsPage = document.getElementById('settingsPage');
   const backToMenuFromSettingsButton = document.getElementById('backToMenuFromSettings');
@@ -72,17 +77,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const defaultLunaTitleVisible = true;
   const defaultTheme = 'purple';
   const defaultAdvancedMode = false;
-  const defaultIntegrationsRate = 20.00; // NEW default for integrations rate
+  const fixedIntegrationsRate = 20.00; // Fixed integrations rate
   const defaultQuoteInputs = {
       companyName: '',
       erpLink: '',
-      integrationsRate: defaultIntegrationsRate, // NEW default for integrations rate
+      // REMOVED: integrationsRate
       lastYearPrice: '',
       msrpTotal: '',
       integrationsSelected: 'no',
       discountIncreaseSelected: 'none',
       discountPercentage: '0',
-      increasePercentage: '5.00%'
+      increasePercentage: '5.00%',
+      notes: '' // NEW default notes
   };
 
   // --- Utility Functions ---
@@ -138,22 +144,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setZoomSelection(selectedZoomLevel) {
+    // Ensure the zoom level is rounded to the nearest 0.05 for display
+    const roundedZoomLevel = Math.round(selectedZoomLevel * 20) / 20; // Round to nearest 0.05
+
     if (zoomSlider) {
-      zoomSlider.value = selectedZoomLevel; // Set slider position
+      zoomSlider.value = roundedZoomLevel; // Set slider position
     }
     if (zoomValueDisplay) {
-      zoomValueDisplay.textContent = `${Math.round(selectedZoomLevel * 100)}%`; // Update display text
+      zoomValueDisplay.textContent = `${Math.round(roundedZoomLevel * 100)}%`; // Update display text
     }
-    applyZoom(selectedZoomLevel);
+    applyZoom(roundedZoomLevel);
 
+    // Save the exact slider value (rounded to step)
     setTimeout(() => {
-        chrome.runtime.sendMessage({ type: 'saveZoomLevel', zoomLevel: selectedZoomLevel }, (response) => {
+        chrome.runtime.sendMessage({ type: 'saveZoomLevel', zoomLevel: roundedZoomLevel }, (response) => {
             if (chrome.runtime.lastError) {
                 console.error('Error sending zoom level to background (after timeout):', chrome.runtime.lastError.message);
             }
         });
     }, 50);
   }
+
 
   // --- Luna Title Visibility Functions ---
   function setLunaTitleVisibility(isVisible, shouldSave = true) {
@@ -182,8 +193,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function setAdvancedMode(isEnabled, shouldSave = true) {
     isAdvancedModeEnabled = isEnabled; // Update global state
     // companyNameGroup is always visible now.
+    // integrationsRateGroup is REMOVED
     if (erpLinkGroup) erpLinkGroup.classList.toggle('hidden', !isEnabled);
-    if (integrationsRateGroup) integrationsRateGroup.classList.toggle('hidden', !isEnabled); // NEW
 
     if (advancedModeEnabledBtn && advancedModeDisabledBtn) {
       if (isEnabled) {
@@ -286,14 +297,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const increaseActive = increaseBtn ? increaseBtn.classList.contains('selected') : false;
     const increasePercentage = parsePercentageInput(increasePercentageInput ? increasePercentageInput.value : '') || 0;
 
-    // Determine integrations rate based on Advanced Mode
-    let currentIntegrationsRate = defaultIntegrationsRate / 100; // Default to 0.20
-    if (isAdvancedModeEnabled && integrationsRateInput) {
-        const parsedRate = parsePercentageInput(integrationsRateInput.value);
-        if (parsedRate !== null) {
-            currentIntegrationsRate = parsedRate / 100;
-        }
-    }
+    // Use the fixed default integrations rate
+    const currentIntegrationsRate = fixedIntegrationsRate / 100;
 
 
     // Basic validation/clamping for internal calculation use
@@ -374,14 +379,15 @@ document.addEventListener('DOMContentLoaded', () => {
     return {
       companyName: companyNameInput ? companyNameInput.value : '',
       erpLink: erpLinkInput ? erpLinkInput.value : '',
-      integrationsRate: integrationsRateInput ? integrationsRateInput.value : String(defaultIntegrationsRate), // NEW
+      // REMOVED: integrationsRate
       lastYearPrice: lastYearPriceInput ? lastYearPriceInput.value : '',
       msrpTotal: msrpTotalInput ? msrpTotalInput.value : '',
       integrationsSelected: integrationsYesButton ? (integrationsYesButton.classList.contains('selected') ? 'yes' : 'no') : 'no',
       discountIncreaseSelected: discountBtn ? (discountBtn.classList.contains('selected') ? 'discount' :
                                 increaseBtn && increaseBtn.classList.contains('selected') ? 'increase' : 'none') : 'none',
       discountPercentage: discountPercentageInput ? discountPercentageInput.value : '0',
-      increasePercentage: increasePercentageInput ? increasePercentageInput.value : '5.00%'
+      increasePercentage: increasePercentageInput ? increasePercentageInput.value : '5.00%',
+      notes: notesInput ? notesInput.value : '' // NEW: Add notes
     };
   }
 
@@ -409,25 +415,26 @@ document.addEventListener('DOMContentLoaded', () => {
         // Restore calculator inputs
         if(companyNameInput) companyNameInput.value = savedInputs.companyName;
         if(erpLinkInput) erpLinkInput.value = savedInputs.erpLink;
-        if(integrationsRateInput) integrationsRateInput.value = String(savedInputs.integrationsRate); // NEW
+        // REMOVED: integrationsRateInput
         if(lastYearPriceInput) lastYearPriceInput.value = formatCurrencyDisplay(savedInputs.lastYearPrice);
         if(msrpTotalInput) msrpTotalInput.value = formatCurrencyDisplay(savedInputs.msrpTotal);
         if(discountPercentageInput) discountPercentageInput.value = savedInputs.discountPercentage;
         if(increasePercentageInput) increasePercentageInput.value = savedInputs.increasePercentage;
+        if(notesInput) notesInput.value = savedInputs.notes || ''; // NEW: Load notes
 
         setIntegrationSelection(savedInputs.integrationsSelected, false);
         setDiscountIncreaseSelection(savedInputs.discountIncreaseSelected, false);
 
         // Restore zoom level and apply it immediately
         const savedZoom = useDefaults ? defaultZoomLevel : (parseFloat(result[STORAGE_KEY_ZOOM]) || defaultZoomLevel);
-        applyZoom(savedZoom);
-        if (zoomSlider) zoomSlider.value = savedZoom; // Ensure slider position is set correctly on load
+        setZoomSelection(savedZoom); // Use setZoomSelection to handle display and rounding
+
 
         // Restore Luna title visibility
         const lunaTitleIsVisible = useDefaults ? defaultLunaTitleVisible : (result[STORAGE_KEY_LUNA_TITLE_VISIBLE] !== false);
         setLunaTitleVisibility(lunaTitleIsVisible, false);
 
-        // Restore Advanced Mode (this will also toggle visibility of ERP Link and Integrations Rate)
+        // Restore Advanced Mode (this will also toggle visibility of ERP Link)
         const advancedModeIsCurrentlyEnabled = useDefaults ? defaultAdvancedMode : (result[STORAGE_KEY_ADVANCED_MODE] === true);
         setAdvancedMode(advancedModeIsCurrentlyEnabled, false);
 
@@ -495,11 +502,12 @@ document.addEventListener('DOMContentLoaded', () => {
       // Reset fields to default empty/initial values
       if (companyNameInput) companyNameInput.value = '';
       if (erpLinkInput) erpLinkInput.value = '';
-      if (integrationsRateInput) integrationsRateInput.value = String(defaultIntegrationsRate); // NEW
+      // REMOVED: integrationsRateInput
       if (lastYearPriceInput) lastYearPriceInput.value = '';
       if (msrpTotalInput) msrpTotalInput.value = '';
       if (discountPercentageInput) discountPercentageInput.value = '0';
       if (increasePercentageInput) increasePercentageInput.value = '5.00%';
+      if (notesInput) notesInput.value = ''; // NEW: Clear notes
 
       setIntegrationSelection('no');
       setDiscountIncreaseSelection('none');
@@ -560,7 +568,11 @@ document.addEventListener('DOMContentLoaded', () => {
           const records = result[STORAGE_KEY_RECORDS] || [];
 
           if (records.length === 0) {
-              recordLogList.innerHTML = '<p class="empty-log-message">No records saved yet.</p>';
+              // Add the "No records saved yet." message if the list is empty
+              const emptyMessage = document.createElement('p');
+              emptyMessage.classList.add('empty-log-message');
+              emptyMessage.textContent = 'No records saved yet.';
+              recordLogList.appendChild(emptyMessage);
               return;
           }
 
@@ -625,47 +637,76 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 
-  // Helper to format record data for display in the log
+  // Helper to format record data for display in the log (Updated Order and using Optional Chaining)
   function formatRecordDetailsForDisplay(record) {
       let content = '';
 
-      // Only add advanced mode fields if they had content or if they are just parameters
-      // For records, we display what was saved, so we don't need to re-check `isAdvancedModeEnabled`
-      if (record.inputs.erpLink || record.inputs.integrationsRate !== String(defaultIntegrationsRate)) {
-          content += `--- Advanced Mode Fields ---\n`;
-          content += `ERP Link: ${record.inputs.erpLink || 'N/A'}\n`;
-          content += `Integrations Rate: ${record.inputs.integrationsRate}% \n\n`; // NEW
+      // Use optional chaining (?.) when accessing properties that might be missing
+      // This is especially important for records saved before these fields were tracked
+      const inputs = record.inputs || {};
+      const outputs = record.outputs || {};
+
+      // 1. Company Name (Always present in newer records, fallback for old)
+      content += `Company Name: ${inputs.companyName || 'N/A'}\n`;
+
+      // 2. ERP Link (Conditional based on saved value)
+      if (inputs.erpLink) {
+           content += `ERP Link: ${inputs.erpLink}\n`;
       }
 
+      // 3. Last Year Price
+      content += `Last Year Price: ${inputs.lastYearPrice || '$0.00'}\n`;
 
-      content += `--- Core Quote Fields ---\n`;
-      content += `Company Name: ${record.inputs.companyName || 'N/A'}\n`; // Now always present
-      content += `Last Year Price: ${record.inputs.lastYearPrice || '$0.00'}\n`;
-      content += `MSRP Total: ${record.inputs.msrpTotal || '$0.00'}\n`;
-      content += `Integrations: ${record.inputs.integrationsSelected === 'yes' ? 'Yes' : 'No'}\n`;
-      content += `Discount/Increase Mode: ${record.inputs.discountIncreaseSelected}\n`;
-      if (record.inputs.discountIncreaseSelected === 'discount') {
-          content += `Discount Percentage: ${record.inputs.discountPercentage || '0.00%'}\n`;
-      } else if (record.inputs.discountIncreaseSelected === 'increase') {
-          content += `Increase Percentage: ${record.inputs.increasePercentage || '0.00%'}\n`;
-      }
-      content += '\n';
+      // 4. MSRP Total
+      content += `MSRP Total: ${inputs.msrpTotal || '$0.00'}\n`;
 
-      content += `--- Calculated Values ---\n`;
-      const integrationsActive = record.inputs.integrationsSelected === 'yes';
-      const increaseActive = record.inputs.discountIncreaseSelected === 'increase';
-      const discountActive = record.inputs.discountIncreaseSelected === 'discount';
+      // 5. Integrations selected?
+      content += `Integrations Selected: ${inputs.integrationsSelected === 'yes' ? 'yes' : 'no'}\n`;
 
-      if (integrationsActive && increaseActive) {
-          content += `Integrations Cost: ${formatCurrencyDisplay(record.outputs.integrationsCost)}\n`;
+      // 6. Discount or Increase Selected?
+      content += `Discount/Increase Selected: ${inputs.discountIncreaseSelected || 'none'}\n`;
+
+      // 7. Discount percentage (if discount was selected)
+      if (inputs.discountIncreaseSelected === 'discount') {
+          content += `Discount Percentage: ${inputs.discountPercentage || '0.00%'}\n`;
       }
-      if (increaseActive && !discountActive) {
-          content += `Discount for ERP: ${formatPercentageDisplay(record.outputs.discountForErp)}\n`;
-          content += `Total End Price: ${formatCurrencyDisplay(record.outputs.totalEndPrice)}\n`;
+
+      // 8. Increase percentage (if increase is selected)
+      if (inputs.discountIncreaseSelected === 'increase') {
+          content += `Increase Percentage: ${inputs.increasePercentage || '0.00%'}\n`;
       }
+
+      content += '\n--- Calculated Values ---\n';
+
+      // Check conditions based on saved inputs
+      const savedIntegrationsActive = inputs.integrationsSelected === 'yes';
+      const savedIncreaseActive = inputs.discountIncreaseSelected === 'increase';
+
+      // 9. Integrations cost (if integrations is set to yes AND increase is selected)
+      // Access using optional chaining
+      if (savedIntegrationsActive && savedIncreaseActive) {
+           content += `Integrations Cost: ${formatCurrencyDisplay(outputs.integrationsCost)}\n`;
+      }
+
+      // 10. Calculated Discount for ERP (if increase is selected AND discount is NOT selected)
+      // Access using optional chaining
+      if (savedIncreaseActive && inputs.discountIncreaseSelected !== 'discount') {
+          content += `Calculated Discount for ERP: ${formatPercentageDisplay(outputs.discountForErp)}\n`;
+      }
+
+      // 11. Calculated Total End Price (if increase is selected AND discount is NOT selected)
+      // Access using optional chaining
+       if (savedIncreaseActive && inputs.discountIncreaseSelected !== 'discount') {
+          content += `Calculated Total End Price: ${formatCurrencyDisplay(outputs.totalEndPrice)}\n`;
+      }
+
+      // 12. Notes (Added - will be N/A for older records)
+      content += `Notes: ${inputs.notes || 'N/A'}\n`;
+
 
       return content.trim();
   }
+
 
   // --- Download Specific Record to TXT ---
   function downloadRecord(record) {
@@ -677,8 +718,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const a = document.createElement('a');
       a.href = url;
       a.download = filename;
+      // Need to append to body to make click work in some browsers
       document.body.appendChild(a);
       a.click();
+      // Clean up the temporary link
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
   }
@@ -689,18 +732,21 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
       }
 
+      const inputs = record.inputs || {}; // Use optional chaining when accessing inputs
+
       // Populate input fields
-      if (companyNameInput) companyNameInput.value = record.inputs.companyName || '';
-      if (erpLinkInput) erpLinkInput.value = record.inputs.erpLink || '';
-      if (integrationsRateInput) integrationsRateInput.value = String(record.inputs.integrationsRate || defaultIntegrationsRate); // NEW
-      if (lastYearPriceInput) lastYearPriceInput.value = record.inputs.lastYearPrice || '';
-      if (msrpTotalInput) msrpTotalInput.value = record.inputs.msrpTotal || '';
-      if (discountPercentageInput) discountPercentageInput.value = record.inputs.discountPercentage || '0';
-      if (increasePercentageInput) increasePercentageInput.value = record.inputs.increasePercentage || '5.00%';
+      if (companyNameInput) companyNameInput.value = inputs.companyName || '';
+      if (erpLinkInput) erpLinkInput.value = inputs.erpLink || '';
+      // REMOVED: integrationsRateInput (Use the fixed default internally)
+      if (lastYearPriceInput) lastYearPriceInput.value = inputs.lastYearPrice || '';
+      if (msrpTotalInput) msrpTotalInput.value = inputs.msrpTotal || '';
+      if (discountPercentageInput) discountPercentageInput.value = inputs.discountPercentage || '0';
+      if (increasePercentageInput) increasePercentageInput.value = inputs.increasePercentage || '5.00%';
+      if (notesInput) notesInput.value = inputs.notes || ''; // NEW: Copy notes
 
       // Set button selections (this will also trigger saveAppState and recalculate)
-      setIntegrationSelection(record.inputs.integrationsSelected || 'no');
-      setDiscountIncreaseSelection(record.inputs.discountIncreaseSelected || 'none');
+      setIntegrationSelection(inputs.integrationsSelected || 'no');
+      setDiscountIncreaseSelection(inputs.discountIncreaseSelected || 'none');
 
       // Go to the calculator page
       showPage('quoteCalculatorPage');
@@ -743,7 +789,7 @@ document.addEventListener('DOMContentLoaded', () => {
           let combinedContent = `Luna All Records Export\nExport Date: ${generateTimestamp(false)}\n\n`;
           records.forEach((record, index) => {
               combinedContent += `===== RECORD ${index + 1} (${record.timestamp}) =====\n`;
-              combinedContent += formatRecordDetailsForDisplay(record);
+              combinedContent += formatRecordDetailsForDisplay(record); // This function is now more robust
               combinedContent += `\n===================================\n\n`; // Separator
           });
 
@@ -754,8 +800,10 @@ document.addEventListener('DOMContentLoaded', () => {
           const a = document.createElement('a');
           a.href = url;
           a.download = filename;
+          // Append to body is standard for cross-browser compatibility with click()
           document.body.appendChild(a);
           a.click();
+          // Clean up the temporary link
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
           console.log("All records downloaded.");
@@ -839,25 +887,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const debounceDelay = 300;
 
   const debounceSave = (event) => {
-    if (event.target.id === 'lastYearPrice' || event.target.id === 'msrpTotal') {
+    // Only recalculate and save on specific inputs
+    if (event.target.id === 'lastYearPrice' ||
+        event.target.id === 'msrpTotal' ||
+        event.target.id === 'discountPercentage' ||
+        event.target.id === 'increasePercentage') {
         calculateTotalAndUpdateDisplay();
         saveAppState();
     } else {
-        clearTimeout(inputSaveTimeout);
-        inputSaveTimeout = setTimeout(() => {
-            calculateTotalAndUpdateDisplay();
-            saveAppState();
-        }, debounceDelay);
+        // Save immediately for text/textarea inputs like Company Name, ERP Link, Notes
+        saveAppState();
     }
   };
 
-  if(companyNameInput) companyNameInput.addEventListener('input', debounceSave);
-  if(erpLinkInput) erpLinkInput.addEventListener('input', debounceSave);
-  if(integrationsRateInput) integrationsRateInput.addEventListener('input', debounceSave); // NEW
+  if(companyNameInput) companyNameInput.addEventListener('input', saveAppState); // Save immediately
+  if(erpLinkInput) erpLinkInput.addEventListener('input', saveAppState); // Save immediately
+  // REMOVED: integrationsRateInput listener
   if(lastYearPriceInput) lastYearPriceInput.addEventListener('input', debounceSave);
   if(msrpTotalInput) msrpTotalInput.addEventListener('input', debounceSave);
   if(discountPercentageInput) discountPercentageInput.addEventListener('input', debounceSave);
   if(increasePercentageInput) increasePercentageInput.addEventListener('input', debounceSave);
+  if(notesInput) notesInput.addEventListener('input', saveAppState); // NEW: Add listener for notes
+
 
   // Currency Input Formatting (on blur)
   if(lastYearPriceInput) {
@@ -902,7 +953,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (zoomSlider) {
     zoomSlider.addEventListener('input', (event) => {
       const zoomLevel = parseFloat(event.target.value);
-      setZoomSelection(zoomLevel);
+      setZoomSelection(zoomLevel); // Use the updated function
     });
   }
 

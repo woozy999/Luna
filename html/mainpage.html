@@ -38,19 +38,13 @@
       <input type="text" id="erpLinkInput">
     </div>
 
-    <!-- NEW: Integrations Rate (Hidden by default, toggled by Advanced Mode) -->
-    <div id="integrationsRateGroup" class="input-group hidden">
-      <label for="integrationsRateInput">Integrations Rate (%):</label>
-      <input type="number" id="integrationsRateInput" value="20.00" min="0" max="1000" step="0.01">
-    </div>
-
     <div class="input-group">
-      <label for="lastYearPrice">Last Year Price ($):</label>
+      <label for="lastYearPrice">Last Year Price:</label>
       <input type="text" id="lastYearPrice" inputmode="decimal">
     </div>
 
     <div class="input-group">
-      <label for="msrpTotal">MSRP Total (No Discounts & No Integrations) ($):</label>
+      <label for="msrpTotal">MSRP Total (No Discounts & No Integrations Cost):</label>
       <input type="text" id="msrpTotal" inputmode="decimal">
     </div>
 
@@ -66,7 +60,7 @@
     <div class="discount-increase-section">
       <label>Discount or Increase?</label>
       <div class="discount-increase-buttons">
-        <button id="discountBtn" class="integration-button" data-value="discount">Discount</button>
+        <button id="discountBtn" class="integration-button" data-value="discount">Discount (disabled)</button>
         <button id="increaseBtn" class="integration-button" data-value="increase">Increase</button>
       </div>
     </div>
@@ -106,6 +100,13 @@
       <!-- Placeholder for more increase related fields later -->
     </div>
 
+    <!-- Notes Section (Added) -->
+    <div class="input-group">
+        <label for="notesInput">Notes:</label>
+        <textarea id="notesInput" rows="4"></textarea>
+    </div>
+
+
   </div>
 
   <!-- Settings Page -->
@@ -115,16 +116,17 @@
       <button id="backToMenuFromSettings" class="back-button">← Back</button>
     </div>
 
-    <div class="settings-group">
+    <div class="settings-group card">
       <label>Magnification</label>
       <div class="magnification-options">
-        <input type="range" id="zoomSlider" min="0.7" max="1.5" step="0.1" value="1.0">
+        <!-- Updated step for 5% increments -->
+        <input type="range" id="zoomSlider" min="0.7" max="1.5" step="0.05" value="1.0">
         <span id="zoomValueDisplay">100%</span>
       </div>
     </div>
 
     <!-- Luna Text Visibility Toggle -->
-    <div class="settings-group">
+    <div class="settings-group card">
       <label>Luna Title Visibility</label>
       <div class="toggle-buttons">
         <button id="lunaTitleVisible" class="toggle-button selected" data-value="visible">Visible</button>
@@ -133,7 +135,7 @@
     </div>
 
     <!-- Advanced Mode Toggle -->
-    <div class="settings-group">
+    <div class="settings-group card">
       <label>Advanced Mode</label>
       <div class="toggle-buttons">
         <button id="advancedModeEnabledBtn" class="toggle-button" data-value="enabled">Enabled</button>
@@ -142,7 +144,7 @@
     </div>
 
     <!-- Theme Selector -->
-    <div class="settings-group">
+    <div class="settings-group card">
       <label>Theme</label>
       <div class="theme-selector">
         <button class="theme-button selected" data-theme="purple"></button>
@@ -171,7 +173,7 @@
     </div>
     <div id="recordLogList" class="record-log-list">
       <!-- Record items will be dynamically loaded here -->
-      <p class="empty-log-message">No records saved yet.</p>
+      <!-- "No records saved yet." message is handled by JS -->
     </div>
   </div>
 
