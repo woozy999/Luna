@@ -267,9 +267,8 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   box-sizing: border-box; /* Important for padding + width */
   min-width: 0; /* Allow flex item to shrink below its content size */
-  white-space: nowrap; /* Prevent button text from wrapping */
-  overflow: hidden; /* Hide overflow content */
-  text-overflow: ellipsis; /* Add ellipsis for clipped button text */
+  white-space: normal; /* Allow button text to wrap */
+  text-align: center; /* Center text for better appearance when wrapped */
 }
 
 .menu-button:hover {
@@ -387,9 +386,7 @@ body {
   box-sizing: border-box;
   text-align: center; /* Ensure text is centered within button */
   min-width: 0; /* Allow flex item to shrink below content size */
-  white-space: nowrap; /* Prevent button text from wrapping */
-  overflow: hidden; /* Hide overflow content */
-  text-overflow: ellipsis; /* Add ellipsis for clipped button text */
+  white-space: normal; /* ALLOW button text to wrap */
   font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
 }
 
@@ -633,9 +630,7 @@ input[type="color"]::-moz-color-swatch {
   margin: 0 5px; /* Space between buttons */
   text-align: center;
   box-sizing: border-box; /* Include padding in width */
-  white-space: nowrap; /* Prevent button text from wrapping */
-  overflow: hidden; /* Hide overflow content */
-  text-overflow: ellipsis; /* Add ellipsis for clipped button text */
+  white-space: normal; /* ALLOW button text to wrap */
   min-width: 0; /* Allow buttons to shrink */
   font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
 }
