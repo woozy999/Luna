@@ -41,6 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const discountForErpValue = document.getElementById('discountForErpValue');
   const totalEndPriceDisplay = document.getElementById('totalEndPriceDisplay');
   const totalEndPriceValue = document.getElementById('totalEndPriceValue');
+  const integrationsPercentageDisplay = document.getElementById('integrationsPercentageDisplay');
+  const integrationsPercentageValue = document.getElementById('integrationsPercentageValue');
+  const priceChangeValueDisplay = document.getElementById('priceChangeValueDisplay');
+  const priceChangeValueValue = document.getElementById('priceChangeValueValue');
 
   // Footer buttons
   const clearAllBtn = document.getElementById('clearAllBtn');
@@ -51,7 +55,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY_RECORDS = 'lunaQuoteRecords'; // For saving completed quotes
   const STORAGE_KEY_ZOOM = 'lunaZoomLevel'; // Global settings
   const STORAGE_KEY_LUNA_TITLE_VISIBLE = 'lunaTitleVisible'; // Global settings
-  const STORAGE_KEY_THEME = 'lunaTheme'; // Global settings
+  const STORAGE_KEY_THEME_MODE = 'lunaThemeMode';
+  const STORAGE_KEY_ACCENT_COLOR = 'lunaAccentColor';
+  const STORAGE_KEY_TEXT_COLOR = 'lunaTextColor';
   const STORAGE_KEY_ADVANCED_MODE = 'lunaAdvancedModeEnabled'; // Global settings
 
   // --- Global State Variables ---
@@ -84,15 +90,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Applies the selected theme to the document body.
-   * @param {string} themeName - The name of the theme (e.g., 'purple', 'blue').
+   * Applies the selected theme mode and colors to the document.
+   * @param {string} mode - 'dark' or 'light'.
+   * @param {string} accentColor - The hex code for the accent color.
+   * @param {string} textColor - The hex code for the highlight text color.
    */
-  function setTheme(themeName) {
+  function applyTheme(mode, accentColor, textColor) {
     const body = document.body;
-    ['purple', 'blue', 'green', 'pink', 'orange', 'red', 'yellow', 'white'].forEach(theme => {
-      body.classList.remove(`theme-${theme}`);
-    });
-    body.classList.add(`theme-${themeName}`);
+    const root = document.documentElement;
+
+    body.classList.toggle('theme-dark', mode === 'dark');
+    body.classList.toggle('theme-light', mode === 'light');
+
+    root.style.setProperty('--accent-color', accentColor);
+    root.style.setProperty('--text-highlight-color', textColor);
   }
 
   /**
@@ -113,6 +124,10 @@ document.addEventListener('DOMContentLoaded', () => {
     isAdvancedModeEnabled = isEnabled; // Update global state
     // ERP Link group is visible only if advanced mode is enabled
     if (erpLinkGroup) erpLinkGroup.classList.toggle('hidden', !isEnabled);
+    // Toggle visibility of advanced display boxes
+    if (integrationsPercentageDisplay) integrationsPercentageDisplay.classList.toggle('hidden', !isEnabled);
+    if (priceChangeValueDisplay) priceChangeValueDisplay.classList.toggle('hidden', !isEnabled);
+
     calculateTotalAndUpdateDisplay(); // Recalculate if Advanced Mode changes (impacts what's shown)
   }
 
@@ -122,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function loadGlobalSettings() {
     chrome.storage.local.get(
-      [STORAGE_KEY_ZOOM, STORAGE_KEY_LUNA_TITLE_VISIBLE, STORAGE_KEY_THEME, STORAGE_KEY_ADVANCED_MODE],
+      [STORAGE_KEY_ZOOM, STORAGE_KEY_LUNA_TITLE_VISIBLE, STORAGE_KEY_THEME_MODE, STORAGE_KEY_ACCENT_COLOR, STORAGE_KEY_TEXT_COLOR, STORAGE_KEY_ADVANCED_MODE],
       (result) => {
         const zoom = parseFloat(result[STORAGE_KEY_ZOOM]) || 1.0;
         applyZoom(zoom);
@@ -130,8 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const isTitleVisible = result[STORAGE_KEY_LUNA_TITLE_VISIBLE] !== false;
         setLunaTitleVisibility(isTitleVisible);
 
-        const theme = result[STORAGE_KEY_THEME] || 'purple';
-        setTheme(theme);
+        const mode = result[STORAGE_KEY_THEME_MODE] || 'dark';
+        const accent = result[STORAGE_KEY_ACCENT_COLOR] || '#8e44ad';
+        const text = result[STORAGE_KEY_TEXT_COLOR] || '#a0c4ff';
+        applyTheme(mode, accent, text);
 
         const advancedModeIsCurrentlyEnabled = result[STORAGE_KEY_ADVANCED_MODE] === true;
         setAdvancedMode(advancedModeIsCurrentlyEnabled); // This will call calculateTotalAndUpdateDisplay
@@ -300,11 +317,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let discountForErp = 0;
     let totalEndPrice = 0;
+    let priceChangeAmount = 0; // New variable for advanced display
 
     // Calculations are only performed if 'Increase' is the selected mode.
     if (increaseActive) {
+      // New: Calculate the dollar amount of the increase
+      priceChangeAmount = validatedLastYearPrice * (validatedIncreasePercentage / 100);
+
       // Total End Price calculation: Last Year Price increased by Increase Percentage
-      totalEndPrice = validatedLastYearPrice * (1 + (validatedIncreasePercentage / 100));
+      totalEndPrice = validatedLastYearPrice + priceChangeAmount;
 
       // Discount for ERP calculation
       let numerator = totalEndPrice;
@@ -317,6 +338,16 @@ document.addEventListener('DOMContentLoaded', () => {
         discountForErp = ((numerator / denominator) - 1) * 100;
       } else {
         discountForErp = 0; // Avoid division by zero
+      }
+    }
+
+    // --- Advanced Mode Display Updates ---
+    if (isAdvancedModeEnabled) {
+      if (integrationsPercentageValue) {
+        integrationsPercentageValue.textContent = formatPercentageDisplay(fixedIntegrationsRate);
+      }
+      if (priceChangeValueValue) {
+        priceChangeValueValue.textContent = formatCurrencyDisplay(priceChangeAmount);
       }
     }
 

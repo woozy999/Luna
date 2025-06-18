@@ -1,136 +1,67 @@
 /* --- GLOBAL STYLES & THEME VARIABLES --- */
 
 :root {
-  /* Default Purple Theme Variables (Dark Mode Base) */
-  --dark-bg: #1e1e1e;
-  --dark-secondary-bg: #2b2b2b;
-  --dark-border: #444;
-  --text-light: #f0f0f0;
-  --text-medium: #ccc;
-  --purple-accent: #8e44ad; /* Strong purple */
-  --purple-accent-hover: #9b59b6; /* Lighter purple on hover */
-  --purple-accent-active: #7f399f; /* Darker purple on active */
+  /* Dynamic colors that will be set by JavaScript */
+  --accent-color: #8e44ad;
+  --text-highlight-color: #a0c4ff;
+  
+  /* Structural variables */
   --highlight-blue: #6a95e0; /* A soft blue for focus/borders, if needed */
-  --selected-button-bg: var(--purple-accent); /* Use accent for selected */
-  --selected-button-border: 1px solid var(--purple-accent-hover);
-  --display-box-bg: #3a3a3a; /* Slightly lighter dark for display boxes */
-  --display-box-border: 1px solid #555;
-  --display-box-text: #a0c4ff; /* Accent color for displayed values */
-
-  /* Card styles */
-  --card-bg: #2b2b2b;
-  --card-border: 1px solid #444;
-  --card-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-
-  --footer-height: 55px; /* Adjust as needed */
+  --footer-height: 55px;
 
   /* Fixed button colors */
   --clear-button-bg: #e74c3c; /* Red */
   --clear-button-hover: #c0392b;
   --clear-button-active: #a82b1d;
-
-  /* Specific lighter green color for Complete button */
   --complete-button-bg: #4CAF50; /* Traditional Green */
-  --complete-button-hover: #45A049; /* Slightly darker for hover */
-  --complete-button-active: #398E3D; /* Slightly darker for active */
-  --complete-button-text: var(--text-light); /* Ensure text is light */
-
-  /* Specific color for Download All button */
+  --complete-button-hover: #45A049;
+  --complete-button-active: #398E3D;
+  --complete-button-text: #f0f0f0;
   --download-all-button-bg: #3498db; /* Blue, matching highlights */
   --download-all-button-hover: #2980b9;
   --download-all-button-active: #2172a5;
 
   /* Icon colors for record log */
-  --record-icon-color: #6a95e0; /* Blue for download/copy icons */
+  --record-icon-color: #6a95e0;
   --record-icon-hover: #a0c4ff;
-  --delete-icon-color: #e74c3c; /* Red for delete icon */
+  --delete-icon-color: #e74c3c;
   --delete-icon-hover: #ff776e;
+  
+  /* New: Advanced Mode Highlight */
+  --advanced-highlight-border: 1px dashed #f39c12; /* Gold/orange */
+  --advanced-highlight-text: #f39c12;
 }
 
-/* Theme-specific overrides */
-body.theme-purple {
-  --purple-accent: #8e44ad;
-  --purple-accent-hover: #9b59b6;
-  --purple-accent-active: #7f399f;
-  --selected-button-bg: var(--purple-accent);
-  --selected-button-border: 1px solid var(--purple-accent-hover);
+/* New Dark Theme */
+body.theme-dark {
+  --dark-bg: #1e1e1e;
+  --dark-secondary-bg: #2b2b2b;
+  --dark-border: #444;
+  --text-light: #f0f0f0;
+  --text-medium: #ccc;
+  --display-box-bg: #3a3a3a;
+  --display-box-border: 1px solid #555;
+  --card-bg: #2b2b2b;
+  --card-border: 1px solid #444;
+  --card-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  --slider-track-color: #555;
 }
 
-body.theme-blue {
-  --purple-accent: #3498db;
-  --purple-accent-hover: #2980b9;
-  --purple-accent-active: #2172a5;
-  --selected-button-bg: var(--purple-accent);
-  --selected-button-border: 1px solid var(--purple-accent-hover);
-}
-
-body.theme-green {
-  --purple-accent: #2ecc71;
-  --purple-accent-hover: #27ae60;
-  --purple-accent-active: #249b56;
-  --selected-button-bg: var(--purple-accent);
-  --selected-button-border: 1px solid var(--purple-accent-hover);
-}
-
-body.theme-pink {
-  --purple-accent: #e91e63;
-  --purple-accent-hover: #d81b60;
-  --purple-accent-active: #c2185b;
-  --selected-button-bg: var(--purple-accent);
-  --selected-button-border: 1px solid var(--purple-accent-hover);
-}
-
-body.theme-orange {
-  --purple-accent: #f39c12;
-  --purple-accent-hover: #e67e22;
-  --purple-accent-active: #d35400;
-  --selected-button-bg: var(--purple-accent);
-  --selected-button-border: 1px solid var(--purple-accent-hover);
-}
-
-body.theme-red {
-  --purple-accent: #e74c3c;
-  --purple-accent-hover: #c0392b;
-  --purple-accent-active: #a82b1d;
-  --selected-button-bg: var(--purple-accent);
-  --selected-button-border: 1px solid var(--purple-accent-hover);
-}
-
-body.theme-yellow {
-  --purple-accent: #d4ac0d; /* A more muted, gold-like yellow for dark theme */
-  --purple-accent-hover: #c19b0d;
-  --purple-accent-active: #aa890b;
-  --selected-button-bg: var(--purple-accent);
-  --selected-button-border: 1px solid var(--purple-accent-hover);
-}
-
-/* White theme overrides for light mode appearance */
-body.theme-white {
-  --dark-bg: #f0f0f0; /* Light background */
-  --dark-secondary-bg: #e0e0e0; /* Slightly darker light for secondary elements */
-  --dark-border: #bbb; /* Light border */
-  --text-light: #1e1e1e; /* Black text */
-  --text-medium: #555; /* Dark grey for secondary text */
-  --display-box-bg: #ffffff; /* White display boxes */
+/* New Light Theme (replaces old theme-white) */
+body.theme-light {
+  --dark-bg: #f0f0f0;
+  --dark-secondary-bg: #e0e0e0;
+  --dark-border: #bbb;
+  --text-light: #1e1e1e;
+  --text-medium: #555;
+  --display-box-bg: #ffffff;
   --display-box-border: 1px solid #ccc;
-  --display-box-text: #007bff; /* A consistent blue for highlight text in light mode */
-
-  --card-bg: #ffffff; /* White cards in light mode */
+  --card-bg: #ffffff;
   --card-border: 1px solid #ccc;
   --card-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-
-  --purple-accent: #6a95e0; /* Blue accent for light theme */
-  --purple-accent-hover: #5680cb;
-  --purple-accent-active: #4a6fa8;
-  --selected-button-bg: var(--purple-accent);
-  --selected-button-border: 1px solid var(--purple-accent-hover);
-
-  /* Adjust slider thumb color for light theme if it uses --purple-accent */
-  #zoomSlider::-webkit-slider-thumb {
-    background: var(--purple-accent);
-    border-color: var(--purple-accent-hover);
-  }
+  --slider-track-color: #ccc;
 }
+
 
 /* --- BASE HTML ELEMENT STYLES --- */
 html {
@@ -170,10 +101,8 @@ body {
 }
 
 /* Specific adjustment for pages with fixed footers to push content up */
-#quoteCalculatorPage .page-container,
-#recordLogPage .page-container {
-    /* This calculation reserves vertical space for the footer + standard padding,
-       effectively reducing the available height for the scrollable content above the footer. */
+#quoteCalculatorPage,
+#recordLogPage {
     padding-bottom: calc(15px + var(--footer-height)); 
 }
 
@@ -228,7 +157,7 @@ body {
 #extensionTitle,
 .calculator-header h1 {
   font-size: 1.8em;
-  color: var(--purple-accent);
+  color: #8e44ad; /* Static purple color */
   margin: 0;
   line-height: 1;
   flex-grow: 1; /* Allow title to take available space */
@@ -298,6 +227,23 @@ body {
   justify-content: flex-start; /* Align content to the top */
 }
 
+/* New: Styles for the main menu toggle buttons */
+.main-menu-toggle-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px; /* Space between toggle and content sections */
+  width: 100%;
+  padding: 0 5px; /* Match input-group padding */
+  box-sizing: border-box;
+}
+
+.main-menu-toggle-buttons .toggle-button {
+    flex-grow: 1; /* Allow buttons to expand */
+    max-width: 150px; /* Limit max width for toggle buttons */
+}
+
+
 .menu-options {
   display: flex;
   flex-direction: column;
@@ -309,14 +255,14 @@ body {
 }
 
 .menu-button {
-  background-color: var(--purple-accent);
+  background-color: var(--accent-color);
   color: var(--text-light);
   padding: 15px 20px; /* Increased padding */
   font-size: 1.2em; /* Slightly larger font */
   border: none;
   border-radius: 8px; /* More rounded corners */
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease, filter 0.2s ease;
   width: 100%; /* Ensure it fills parent's width */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   box-sizing: border-box; /* Important for padding + width */
@@ -327,20 +273,20 @@ body {
 }
 
 .menu-button:hover {
-  background-color: var(--purple-accent-hover);
+  filter: brightness(1.1);
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Increased shadow on hover */
 }
 
 .menu-button:active {
-  background-color: var(--purple-accent-active);
+  filter: brightness(0.9);
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Reset Button specific styles */
 .menu-button.reset-button {
-    background-color: var(--clear-button-bg); /* Use clear button red for reset */
+    background-color: var(--clear-button-bg);
     margin-top: 30px; /* Space it from other settings */
     font-size: 1em;
     padding: 10px 15px;
@@ -385,6 +331,7 @@ body {
   box-sizing: border-box; /* Ensure padding is included in width */
   resize: vertical; /* Allow vertical resizing for textarea */
   min-width: 0; /* Allow input to shrink to fit container */
+  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
 }
 
 .input-group input[type="text"]:focus,
@@ -412,6 +359,7 @@ body {
   margin-bottom: 8px;
   color: var(--text-medium);
   text-align: center;
+  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
 }
 
 .integration-buttons,
@@ -442,6 +390,7 @@ body {
   white-space: nowrap; /* Prevent button text from wrapping */
   overflow: hidden; /* Hide overflow content */
   text-overflow: ellipsis; /* Add ellipsis for clipped button text */
+  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
 }
 
 .integration-button:hover,
@@ -453,9 +402,9 @@ body {
 
 .integration-button.selected,
 .toggle-button.selected {
-  background-color: var(--selected-button-bg);
+  background-color: var(--accent-color);
   color: var(--text-light);
-  border-color: var(--selected-button-border);
+  border-color: transparent;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
@@ -482,12 +431,13 @@ body {
   font-size: 0.9em;
   margin-bottom: 5px;
   color: var(--text-medium);
+  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
 }
 
 .display-box {
   background-color: var(--display-box-bg);
   border: var(--display-box-border);
-  color: var(--display-box-text); /* Highlighted color for output */
+  color: var(--text-highlight-color); /* Highlighted color for output */
   padding: 8px;
   border-radius: 4px;
   font-size: 1em;
@@ -499,6 +449,18 @@ body {
   box-sizing: border-box;
   font-weight: bold;
   min-width: 0; /* Allow to shrink */
+  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
+}
+
+.advanced-tag {
+  font-size: 0.8em;
+  color: var(--advanced-highlight-text);
+  font-weight: normal;
+  margin-left: 5px;
+}
+
+.advanced-display .display-box {
+  border: var(--advanced-highlight-border);
 }
 
 /* --- SETTINGS PAGE STYLES --- */
@@ -530,6 +492,7 @@ body {
   margin-bottom: 10px;
   color: var(--text-medium);
   text-align: center;
+  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
 }
 
 /* Styles for the magnification slider and its display */
@@ -550,7 +513,7 @@ body {
   width: 90%; /* Allow some margin from sides */
   height: 8px;
   border-radius: 4px; /* Slightly less rounded track */
-  background: var(--dark-secondary-bg); /* Solid background color */
+  background: var(--slider-track-color); /* Use the new track color variable */
   outline: none;
   opacity: 1; /* Always fully opaque */
   transition: background-color 0.2s ease; /* Smooth transition on hover */
@@ -564,22 +527,22 @@ body {
   width: 20px;
   height: 20px;
   border-radius: 50%; /* Keep it a circle */
-  background: var(--purple-accent); /* Thumb color from theme accent */
+  background: var(--accent-color); /* Thumb color from theme accent */
   cursor: grab;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   margin-top: -6px;
   border: 2px solid var(--dark-bg); /* Border from background color */
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
 }
 
 #zoomSlider:hover::-webkit-slider-thumb {
-  background: var(--purple-accent-hover);
+  filter: brightness(1.1);
   border-color: var(--dark-secondary-bg); /* Border from secondary background */
 }
 
 #zoomSlider::-webkit-slider-thumb:active {
   cursor: grabbing;
-  background: var(--purple-accent-active);
+  filter: brightness(0.9);
 }
 
 #zoomValueDisplay {
@@ -589,48 +552,50 @@ body {
   min-width: 60px; /* Give it enough space to display "100%" or "150%" */
   text-align: center;
   flex-shrink: 0; /* Prevent text from shrinking */
+  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
 }
 
 /* Theme Selector Styles */
-.theme-selector {
+.theme-options {
   display: flex;
-  flex-wrap: wrap; /* Allow wrapping to next line if too many colors */
+  flex-direction: column;
+  gap: 15px;
+}
+
+.color-picker-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 10px;
-  justify-content: center;
 }
 
-.theme-button {
-  width: 30px; /* Size of the color swatch */
-  height: 30px; /* Size of the color swatch */
-  border-radius: 50%; /* Make them circles */
-  border: 2px solid transparent; /* Default transparent border */
+.color-picker-group label {
+  margin-bottom: 0; /* Override default margin */
+  text-align: left;
+  flex-grow: 1;
+}
+
+input[type="color"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 40px;
+  height: 40px;
+  background-color: transparent;
+  border: none;
   cursor: pointer;
-  transition: border-color 0.2s ease, transform 0.1s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  flex-shrink: 0; /* Prevent buttons from shrinking */
+  border-radius: 50%;
+  overflow: hidden;
+}
+input[type="color"]::-webkit-color-swatch {
+  border-radius: 50%;
+  border: 1px solid var(--dark-border);
+}
+input[type="color"]::-moz-color-swatch {
+  border-radius: 50%;
+  border: 1px solid var(--dark-border);
 }
 
-/* Individual theme button colors */
-.theme-button[data-theme="purple"] { background-color: #8e44ad; }
-.theme-button[data-theme="blue"] { background-color: #3498db; }
-.theme-button[data-theme="green"] { background-color: #2ecc71; }
-.theme-button[data-theme="pink"] { background-color: #e91e63; }
-.theme-button[data-theme="orange"] { background-color: #f39c12; }
-.theme-button[data-theme="red"] { background-color: #e74c3c; }
-.theme-button[data-theme="yellow"] { background-color: #d4ac0d; } /* Match CSS var */
-.theme-button[data-theme="white"] { background-color: #ecf0f1; border: 1px solid #ccc; /* Add light border for white theme button */ }
-
-
-.theme-button:hover {
-  transform: scale(1.1);
-  border-color: var(--dark-border); /* Subtle hover border */
-}
-
-.theme-button.selected {
-  border-color: var(--highlight-blue); /* Stronger border for selected theme */
-  box-shadow: 0 0 0 3px rgba(106, 149, 224, 0.5); /* Outer glow for selected */
-  transform: scale(1.05); /* Slightly larger when selected */
-}
 
 /* --- FOOTER BAR STYLES --- */
 .calculator-footer-bar,
@@ -672,6 +637,7 @@ body {
   overflow: hidden; /* Hide overflow content */
   text-overflow: ellipsis; /* Add ellipsis for clipped button text */
   min-width: 0; /* Allow buttons to shrink */
+  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
 }
 
 /* Remove margin for first/last buttons in calculator footer to fit full width */
@@ -773,6 +739,7 @@ body {
   overflow: hidden; /* Hide overflow */
   text-overflow: ellipsis; /* Add ellipsis */
   min-width: 0; /* Allow text to shrink */
+  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
 }
 
 .record-actions {
@@ -819,4 +786,5 @@ body {
   text-align: center;
   color: var(--text-medium);
   margin-top: 30px;
+  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
 }

@@ -16,16 +16,26 @@
 document.addEventListener('DOMContentLoaded', () => {
   // --- Element References ---
   const lunaTitle = document.getElementById('extensionTitle');
+  const toolsToggleBtn = document.getElementById('toolsToggleBtn');
+  const logsToggleBtn = document.getElementById('logsToggleBtn');
+  const toolsSection = document.getElementById('toolsSection');
+  const logsSection = document.getElementById('logsSection');
 
   // --- Storage Keys ---
   const STORAGE_KEY_ZOOM = 'lunaZoomLevel';
   const STORAGE_KEY_LUNA_TITLE_VISIBLE = 'lunaTitleVisible';
-  const STORAGE_KEY_THEME = 'lunaTheme';
+  const STORAGE_KEY_THEME_MODE = 'lunaThemeMode';
+  const STORAGE_KEY_ACCENT_COLOR = 'lunaAccentColor';
+  const STORAGE_KEY_TEXT_COLOR = 'lunaTextColor';
+  const STORAGE_KEY_MAIN_MENU_VIEW = 'lunaMainMenuLastView'; // New storage key
 
   // --- Default Values ---
   const defaultZoomLevel = 1.0;
   const defaultLunaTitleVisible = true;
-  const defaultTheme = 'purple';
+  const defaultThemeMode = 'dark';
+  const defaultAccentColor = '#8e44ad';
+  const defaultTextColor = '#a0c4ff';
+  const defaultMainMenuLastView = 'tools'; // Default view for the main menu
 
   /**
    * Applies the saved zoom level to the document body.
@@ -46,17 +56,47 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Applies the selected theme to the document body.
-   * @param {string} themeName - The name of the theme (e.g., 'purple', 'blue').
+   * Applies the selected theme mode and colors to the document.
+   * @param {string} mode - 'dark' or 'light'.
+   * @param {string} accentColor - The hex code for the accent color.
+   * @param {string} textColor - The hex code for the highlight text color.
    */
-  function setTheme(themeName) {
+  function applyTheme(mode, accentColor, textColor) {
     const body = document.body;
-    // Remove all existing theme classes to ensure only one is active
-    ['purple', 'blue', 'green', 'pink', 'orange', 'red', 'yellow', 'white'].forEach(theme => {
-      body.classList.remove(`theme-${theme}`);
-    });
-    // Add the selected theme class
-    body.classList.add(`theme-${themeName}`);
+    const root = document.documentElement;
+
+    body.classList.toggle('theme-dark', mode === 'dark');
+    body.classList.toggle('theme-light', mode === 'light');
+
+    root.style.setProperty('--accent-color', accentColor);
+    root.style.setProperty('--text-highlight-color', textColor);
+  }
+
+  /**
+   * Toggles the visibility of the Tools and Logs sections in the main menu.
+   * @param {string} viewName - 'tools' or 'logs'.
+   * @param {boolean} [shouldSave=true] - Whether to save the setting to storage.
+   */
+  function setMainMenuView(viewName, shouldSave = true) {
+    // Update button visual state
+    toolsToggleBtn.classList.toggle('selected', viewName === 'tools');
+    logsToggleBtn.classList.toggle('selected', viewName === 'logs');
+
+    // Update section visibility
+    toolsSection.classList.toggle('hidden', viewName !== 'tools');
+    logsSection.classList.toggle('hidden', viewName !== 'logs');
+
+    // Save to storage
+    if (shouldSave) {
+      chrome.runtime.sendMessage({
+        type: 'saveSetting',
+        payload: { key: STORAGE_KEY_MAIN_MENU_VIEW, value: viewName }
+      }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error('MainMenu: Error saving main menu view:', chrome.runtime.lastError.message);
+        }
+      });
+    }
   }
 
   /**
@@ -65,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function loadGlobalSettings() {
     chrome.storage.local.get(
-      [STORAGE_KEY_ZOOM, STORAGE_KEY_LUNA_TITLE_VISIBLE, STORAGE_KEY_THEME],
+      [STORAGE_KEY_ZOOM, STORAGE_KEY_LUNA_TITLE_VISIBLE, STORAGE_KEY_THEME_MODE, STORAGE_KEY_ACCENT_COLOR, STORAGE_KEY_TEXT_COLOR, STORAGE_KEY_MAIN_MENU_VIEW],
       (result) => {
         // Apply Zoom Level
         const zoom = parseFloat(result[STORAGE_KEY_ZOOM]) || defaultZoomLevel;
@@ -76,16 +116,26 @@ document.addEventListener('DOMContentLoaded', () => {
         setLunaTitleVisibility(isTitleVisible);
 
         // Apply Theme
-        const theme = result[STORAGE_KEY_THEME] || defaultTheme;
-        setTheme(theme);
+        const mode = result[STORAGE_KEY_THEME_MODE] || defaultThemeMode;
+        const accent = result[STORAGE_KEY_ACCENT_COLOR] || defaultAccentColor;
+        const text = result[STORAGE_KEY_TEXT_COLOR] || defaultTextColor;
+        applyTheme(mode, accent, text);
+
+        // Apply Main Menu View
+        const lastView = result[STORAGE_KEY_MAIN_MENU_VIEW] || defaultMainMenuLastView;
+        setMainMenuView(lastView, false); // Apply without saving again
       }
     );
   }
 
-  // --- Initial Setup on DOM Load ---
-  // Load global settings (zoom, title visibility, theme) when the main menu page loads.
-  loadGlobalSettings();
+  // --- Event Listeners ---
+  if (toolsToggleBtn) {
+    toolsToggleBtn.addEventListener('click', () => setMainMenuView('tools'));
+  }
+  if (logsToggleBtn) {
+    logsToggleBtn.addEventListener('click', () => setMainMenuView('logs'));
+  }
 
-  // No specific event listeners are needed for menu navigation as it uses direct `<a>` tags.
-  // The global settings are loaded here to apply to the main menu itself.
+  // --- Initial Setup on DOM Load ---
+  loadGlobalSettings();
 });

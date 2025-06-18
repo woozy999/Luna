@@ -20,7 +20,10 @@ chrome.runtime.onInstalled.addListener(() => {
     lunaZoomLevel: 1.0,
     lunaTitleVisible: true,
     lunaAdvancedModeEnabled: false,
-    lunaTheme: 'purple',
+    lunaThemeMode: 'dark',
+    lunaAccentColor: '#8e44ad',
+    lunaTextColor: '#a0c4ff',
+    lunaMainMenuLastView: 'tools',
     lunaQuoteCalculatorInputs: {
       companyName: '',
       erpLink: '',
@@ -31,6 +34,11 @@ chrome.runtime.onInstalled.addListener(() => {
       discountPercentage: '0',
       increasePercentage: '5.00%',
       notes: ''
+    },
+    lunaCreditCalculatorInputs: {
+        amount: '',
+        purchaseDate: '',
+        duration: 1
     },
     lunaQuoteRecords: [] // Initialize records as an empty array
   };

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Credit Calculator - Luna</title>
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+
+  <div class="calculator-header">
+    <div class="header-left">
+      <img class="extensionIcon" src="../icons/icon.png" alt="Luna Icon">
+      <h1 id="extensionTitle">Luna</h1>
+    </div>
+    <a href="../html/mainMenu.html" class="back-button" title="Back to Main Menu">← Back</a>
+  </div>
+
+  <div id="creditCalculatorPage" class="page-container">
+
+    <div class="input-group">
+      <label for="creditAmountInput">Amount:</label>
+      <input type="text" id="creditAmountInput" inputmode="decimal" placeholder="$0.00">
+    </div>
+
+    <div class="input-group">
+      <label for="purchaseDateInput">Date of Purchase:</label>
+      <input type="text" id="purchaseDateInput" placeholder="mm/dd/yyyy">
+    </div>
+
+    <div class="integrations-section">
+      <label>License Duration</label>
+      <div class="toggle-buttons">
+        <button id="duration1yr" class="toggle-button selected" data-years="1">1yr</button>
+        <button id="duration2yr" class="toggle-button" data-years="2">2yr</button>
+        <button id="duration3yr" class="toggle-button" data-years="3">3yr</button>
+      </div>
+    </div>
+
+    <!-- Display boxes for calculations -->
+    <div id="expirationDateDisplay" class="display-group">
+      <label>Expiration Date:</label>
+      <div class="display-box" id="expirationDateValue">N/A</div>
+    </div>
+
+    <div id="daysRemainingDisplay" class="display-group">
+      <label>Days Remaining:</label>
+      <div class="display-box" id="daysRemainingValue">N/A</div>
+    </div>
+
+    <div id="creditPerDayDisplay" class="display-group advanced-display hidden">
+      <label>Credit per Day <span class="advanced-tag">(ADVANCED)</span>:</label>
+      <div class="display-box" id="creditPerDayValue">$0.00</div>
+    </div>
+    
+    <div id="totalCreditDisplay" class="display-group">
+      <label>Total Credit Remaining:</label>
+      <div class="display-box" id="totalCreditValue">$0.00</div>
+    </div>
+
+  </div>
+
+  <!-- Calculator Footer Bar -->
+  <div id="calculatorFooter" class="calculator-footer-bar">
+    <button id="clearAllBtn" class="footer-button clear-button">🗑️ Clear All</button>
+  </div>
+
+  <script type="module" src="../js/creditCalculator.js"></script>
+  <script type="module" src="../js/utils.js"></script>
+</body>
+</html>

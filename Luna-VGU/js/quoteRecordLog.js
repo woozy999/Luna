@@ -22,12 +22,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY_INPUTS = 'lunaQuoteCalculatorInputs'; // To copy data back to calculator
   const STORAGE_KEY_ZOOM = 'lunaZoomLevel'; // Global settings
   const STORAGE_KEY_LUNA_TITLE_VISIBLE = 'lunaTitleVisible'; // Global settings
-  const STORAGE_KEY_THEME = 'lunaTheme'; // Global settings
+  const STORAGE_KEY_THEME_MODE = 'lunaThemeMode';
+  const STORAGE_KEY_ACCENT_COLOR = 'lunaAccentColor';
+  const STORAGE_KEY_TEXT_COLOR = 'lunaTextColor';
 
   // --- Default Values for Global Settings ---
   const defaultZoomLevel = 1.0;
   const defaultLunaTitleVisible = true;
-  const defaultTheme = 'purple';
+  const defaultThemeMode = 'dark';
+  const defaultAccentColor = '#8e44ad';
+  const defaultTextColor = '#a0c4ff';
 
   /**
    * Applies the saved zoom level to the document body.
@@ -48,15 +52,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Applies the selected theme to the document body.
-   * @param {string} themeName - The name of the theme (e.g., 'purple', 'blue').
+   * Applies the selected theme mode and colors to the document.
+   * @param {string} mode - 'dark' or 'light'.
+   * @param {string} accentColor - The hex code for the accent color.
+   * @param {string} textColor - The hex code for the highlight text color.
    */
-  function setTheme(themeName) {
+  function applyTheme(mode, accentColor, textColor) {
     const body = document.body;
-    ['purple', 'blue', 'green', 'pink', 'orange', 'red', 'yellow', 'white'].forEach(theme => {
-      body.classList.remove(`theme-${theme}`);
-    });
-    body.classList.add(`theme-${themeName}`);
+    const root = document.documentElement;
+
+    body.classList.toggle('theme-dark', mode === 'dark');
+    body.classList.toggle('theme-light', mode === 'light');
+
+    root.style.setProperty('--accent-color', accentColor);
+    root.style.setProperty('--text-highlight-color', textColor);
   }
 
   /**
@@ -65,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function loadGlobalSettings() {
     chrome.storage.local.get(
-      [STORAGE_KEY_ZOOM, STORAGE_KEY_LUNA_TITLE_VISIBLE, STORAGE_KEY_THEME],
+      [STORAGE_KEY_ZOOM, STORAGE_KEY_LUNA_TITLE_VISIBLE, STORAGE_KEY_THEME_MODE, STORAGE_KEY_ACCENT_COLOR, STORAGE_KEY_TEXT_COLOR],
       (result) => {
         const zoom = parseFloat(result[STORAGE_KEY_ZOOM]) || defaultZoomLevel;
         applyZoom(zoom);
@@ -73,8 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const isTitleVisible = result[STORAGE_KEY_LUNA_TITLE_VISIBLE] !== false;
         setLunaTitleVisibility(isTitleVisible);
 
-        const theme = result[STORAGE_KEY_THEME] || defaultTheme;
-        setTheme(theme);
+        const mode = result[STORAGE_KEY_THEME_MODE] || defaultThemeMode;
+        const accent = result[STORAGE_KEY_ACCENT_COLOR] || defaultAccentColor;
+        const text = result[STORAGE_KEY_TEXT_COLOR] || defaultTextColor;
+        applyTheme(mode, accent, text);
       }
     );
   }

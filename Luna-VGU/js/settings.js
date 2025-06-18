@@ -22,23 +22,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const lunaTitleHiddenButton = document.getElementById('lunaTitleHidden');
   const advancedModeEnabledBtn = document.getElementById('advancedModeEnabledBtn');
   const advancedModeDisabledBtn = document.getElementById('advancedModeDisabledBtn');
-  const themeButtons = document.querySelectorAll('.theme-button');
+  const themeModeDarkBtn = document.getElementById('themeModeDarkBtn');
+  const themeModeLightBtn = document.getElementById('themeModeLightBtn');
+  const accentColorPicker = document.getElementById('accentColorPicker');
+  const textColorPicker = document.getElementById('textColorPicker');
   const resetAllButton = document.getElementById('resetAllButton');
 
   // --- Storage Keys ---
   const STORAGE_KEY_ZOOM = 'lunaZoomLevel';
   const STORAGE_KEY_LUNA_TITLE_VISIBLE = 'lunaTitleVisible';
   const STORAGE_KEY_ADVANCED_MODE = 'lunaAdvancedModeEnabled';
-  const STORAGE_KEY_THEME = 'lunaTheme';
+  const STORAGE_KEY_THEME_MODE = 'lunaThemeMode';
+  const STORAGE_KEY_ACCENT_COLOR = 'lunaAccentColor';
+  const STORAGE_KEY_TEXT_COLOR = 'lunaTextColor';
   const STORAGE_KEY_INPUTS = 'lunaQuoteCalculatorInputs'; // To clear on reset
+  const STORAGE_KEY_CREDIT_INPUTS = 'lunaCreditCalculatorInputs'; // To clear on reset
   const STORAGE_KEY_RECORDS = 'lunaQuoteRecords'; // To clear on reset
   const STORAGE_KEY_LAST_PAGE = 'lunaLastPage'; // To clear on reset
+  const STORAGE_KEY_MAIN_MENU_VIEW = 'lunaMainMenuLastView';
 
   // --- Default Values (for reset) ---
   const defaultZoomLevel = 1.0;
   const defaultLunaTitleVisible = true;
   const defaultAdvancedMode = false;
-  const defaultTheme = 'purple';
+  const defaultThemeMode = 'dark';
+  const defaultAccentColor = '#8e44ad';
+  const defaultTextColor = '#a0c4ff';
+  const defaultMainMenuLastView = 'tools';
   const defaultQuoteInputs = {
       companyName: '',
       erpLink: '',
@@ -141,39 +151,34 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Applies the selected theme to the document body and updates the theme buttons.
-   * Sends the selected theme to the background script for persistence.
-   * @param {string} themeName - The name of the theme (e.g., 'purple', 'blue').
-   * @param {boolean} [shouldSave=true] - Whether to save the setting to storage.
+   * Applies the selected theme mode and colors to the document.
+   * Sends the settings to the background script for persistence.
+   * @param {string} mode - 'dark' or 'light'.
+   * @param {string} accentColor - The hex code for the accent color.
+   * @param {string} textColor - The hex code for the highlight text color.
+   * @param {boolean} [shouldSave=true] - Whether to save the settings to storage.
    */
-  function setTheme(themeName, shouldSave = true) {
+  function applyTheme(mode, accentColor, textColor, shouldSave = true) {
     const body = document.body;
-    // Remove all existing theme classes to ensure only one is active
-    ['purple', 'blue', 'green', 'pink', 'orange', 'red', 'yellow', 'white'].forEach(theme => {
-      body.classList.remove(`theme-${theme}`);
-    });
-    // Add the selected theme class
-    body.classList.add(`theme-${themeName}`);
+    const root = document.documentElement;
 
-    // Update selected state of theme buttons
-    themeButtons.forEach(button => {
-      if (button.dataset.theme === themeName) {
-        button.classList.add('selected');
-      } else {
-        button.classList.remove('selected');
-      }
-    });
+    // 1. Set Mode
+    body.classList.toggle('theme-dark', mode === 'dark');
+    body.classList.toggle('theme-light', mode === 'light');
+    if (themeModeDarkBtn) themeModeDarkBtn.classList.toggle('selected', mode === 'dark');
+    if (themeModeLightBtn) themeModeLightBtn.classList.toggle('selected', mode === 'light');
 
-    // Save to storage
+    // 2. Set Colors
+    root.style.setProperty('--accent-color', accentColor);
+    root.style.setProperty('--text-highlight-color', textColor);
+    if (accentColorPicker) accentColorPicker.value = accentColor;
+    if (textColorPicker) textColorPicker.value = textColor;
+
+    // 3. Save to storage
     if (shouldSave) {
-      chrome.runtime.sendMessage({
-        type: 'saveSetting',
-        payload: { key: STORAGE_KEY_THEME, value: themeName }
-      }, (response) => {
-        if (chrome.runtime.lastError) {
-          console.error('Settings: Error saving theme:', chrome.runtime.lastError.message);
-        }
-      });
+      chrome.runtime.sendMessage({ type: 'saveSetting', payload: { key: STORAGE_KEY_THEME_MODE, value: mode } });
+      chrome.runtime.sendMessage({ type: 'saveSetting', payload: { key: STORAGE_KEY_ACCENT_COLOR, value: accentColor } });
+      chrome.runtime.sendMessage({ type: 'saveSetting', payload: { key: STORAGE_KEY_TEXT_COLOR, value: textColor } });
     }
   }
 
@@ -183,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function loadSettings() {
     chrome.storage.local.get(
-      [STORAGE_KEY_ZOOM, STORAGE_KEY_LUNA_TITLE_VISIBLE, STORAGE_KEY_ADVANCED_MODE, STORAGE_KEY_THEME],
+      [STORAGE_KEY_ZOOM, STORAGE_KEY_LUNA_TITLE_VISIBLE, STORAGE_KEY_ADVANCED_MODE, STORAGE_KEY_THEME_MODE, STORAGE_KEY_ACCENT_COLOR, STORAGE_KEY_TEXT_COLOR],
       (result) => {
         // Load and apply Zoom Level
         const zoom = parseFloat(result[STORAGE_KEY_ZOOM]) || defaultZoomLevel;
@@ -199,8 +204,10 @@ document.addEventListener('DOMContentLoaded', () => {
         setAdvancedMode(isAdvanced, false); // Apply without saving again
 
         // Load and apply Theme
-        const theme = result[STORAGE_KEY_THEME] || defaultTheme;
-        setTheme(theme, false); // Apply without saving again
+        const mode = result[STORAGE_KEY_THEME_MODE] || defaultThemeMode;
+        const accent = result[STORAGE_KEY_ACCENT_COLOR] || defaultAccentColor;
+        const text = result[STORAGE_KEY_TEXT_COLOR] || defaultTextColor;
+        applyTheme(mode, accent, text, false); // Apply without saving again
       }
     );
   }
@@ -217,12 +224,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // List all storage keys that contain user data/settings
     const keysToClear = [
       STORAGE_KEY_INPUTS,
-      STORAGE_KEY_LAST_PAGE, // Will reset to mainMenu on next load
+      STORAGE_KEY_CREDIT_INPUTS,
+      STORAGE_KEY_LAST_PAGE,
       STORAGE_KEY_ZOOM,
       STORAGE_KEY_LUNA_TITLE_VISIBLE,
-      STORAGE_KEY_THEME,
       STORAGE_KEY_ADVANCED_MODE,
-      STORAGE_KEY_RECORDS
+      STORAGE_KEY_RECORDS,
+      STORAGE_KEY_MAIN_MENU_VIEW,
+      STORAGE_KEY_THEME_MODE,
+      STORAGE_KEY_ACCENT_COLOR,
+      STORAGE_KEY_TEXT_COLOR
     ];
 
     chrome.storage.local.remove(keysToClear, () => {
@@ -263,15 +274,27 @@ document.addEventListener('DOMContentLoaded', () => {
     advancedModeDisabledBtn.addEventListener('click', () => setAdvancedMode(false));
   }
 
-  // Theme selector button clicks
-  if (themeButtons && themeButtons.length > 0) {
-    themeButtons.forEach(button => {
-      button.addEventListener('click', (event) => {
-        const selectedTheme = event.target.dataset.theme;
-        if (selectedTheme) {
-          setTheme(selectedTheme);
-        }
-      });
+  // Theme control listeners
+  if (themeModeDarkBtn) {
+    themeModeDarkBtn.addEventListener('click', () => {
+      applyTheme('dark', accentColorPicker.value, textColorPicker.value);
+    });
+  }
+  if (themeModeLightBtn) {
+    themeModeLightBtn.addEventListener('click', () => {
+      applyTheme('light', accentColorPicker.value, textColorPicker.value);
+    });
+  }
+  if (accentColorPicker) {
+    accentColorPicker.addEventListener('input', () => {
+      const currentMode = themeModeDarkBtn.classList.contains('selected') ? 'dark' : 'light';
+      applyTheme(currentMode, accentColorPicker.value, textColorPicker.value);
+    });
+  }
+  if (textColorPicker) {
+    textColorPicker.addEventListener('input', () => {
+      const currentMode = themeModeDarkBtn.classList.contains('selected') ? 'dark' : 'light';
+      applyTheme(currentMode, accentColorPicker.value, textColorPicker.value);
     });
   }
 
