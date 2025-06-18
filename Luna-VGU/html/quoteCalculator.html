@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quote Calculator - Luna</title>
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+
+  <div class="calculator-header">
+    <div class="header-left">
+      <img class="extensionIcon" src="../icons/icon.png" alt="Luna Icon">
+      <h1 id="extensionTitle">Luna</h1>
+    </div>
+    <a href="../html/mainMenu.html" class="back-button" title="Back to Main Menu">← Back</a>
+  </div>
+
+  <div id="quoteCalculatorPage" class="page-container">
+
+    <div class="input-group">
+      <label for="companyNameInput">Company Name:</label>
+      <input type="text" id="companyNameInput">
+    </div>
+
+    <!-- ERP Link (Hidden by default, toggled by Advanced Mode) -->
+    <div id="erpLinkGroup" class="input-group hidden">
+      <label for="erpLinkInput">ERP Link:</label>
+      <input type="text" id="erpLinkInput">
+    </div>
+
+    <div class="input-group">
+      <label for="lastYearPrice">Last Year Price:</label>
+      <input type="text" id="lastYearPrice" inputmode="decimal" placeholder="$0.00">
+    </div>
+
+    <div class="input-group">
+      <label for="msrpTotal">MSRP Total (No Discounts & No Integrations Cost):</label>
+      <input type="text" id="msrpTotal" inputmode="decimal" placeholder="$0.00">
+    </div>
+
+    <div class="integrations-section">
+      <label>Integrations?</label>
+      <div class="integration-buttons">
+        <button id="integrationsYes" class="integration-button" data-value="yes">Yes</button>
+        <button id="integrationsNo" class="integration-button selected" data-value="no">No</button>
+      </div>
+    </div>
+
+    <div class="discount-increase-section">
+      <label>Discount or Increase?</label>
+      <div class="discount-increase-buttons">
+        <button id="discountBtn" class="integration-button" data-value="discount" disabled title="Discount functionality coming soon!">Discount (disabled)</button>
+        <button id="increaseBtn" class="integration-button selected" data-value="increase">Increase</button>
+      </div>
+    </div>
+
+    <!-- Conditional Fields for Discount (currently disabled) -->
+    <div id="discountFields" class="conditional-fields hidden">
+      <div class="input-group">
+        <label for="discountPercentage">Discount Percentage (%):</label>
+        <input type="number" id="discountPercentage" value="0" min="0" max="100">
+      </div>
+      <!-- Placeholder for more discount related fields later -->
+    </div>
+
+    <!-- Conditional Fields for Increase (initially visible/selected) -->
+    <div id="increaseFields" class="conditional-fields">
+      <div class="input-group">
+        <label for="increasePercentage">Increase Percentage (%):</label>
+        <input type="text" id="increasePercentage" value="5.00%" min="0" max="1000" inputmode="decimal" placeholder="5.00%">
+      </div>
+
+      <!-- Display boxes for Increase calculations -->
+      <div id="integrationsCostDisplay" class="display-group hidden">
+        <label>Integrations Cost:</label>
+        <div class="display-box" id="integrationsCostValue">$0.00</div>
+      </div>
+
+      <div id="discountForErpDisplay" class="display-group hidden">
+        <label>Discount for ERP:</label>
+        <div class="display-box" id="discountForErpValue">0.00%</div>
+      </div>
+
+      <!-- Total End Price Display Box -->
+      <div id="totalEndPriceDisplay" class="display-group hidden">
+        <label>Total End Price:</label>
+        <div class="display-box" id="totalEndPriceValue">$0.00</div>
+      </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="input-group">
+      <label for="notesInput">Notes:</label>
+      <textarea id="notesInput" rows="4"></textarea>
+    </div>
+
+  </div>
+
+  <!-- Calculator Footer Bar -->
+  <div id="calculatorFooter" class="calculator-footer-bar">
+    <button id="clearAllBtn" class="footer-button clear-button">🗑️ Clear All</button>
+    <button id="completeBtn" class="footer-button complete-button">💾 Complete</button>
+  </div>
+
+  <script type="module" src="../js/quoteCalculator.js"></script>
+  <script type="module" src="../js/utils.js"></script>
+</body>
+</html>
