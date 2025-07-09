@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Need Formatter - Luna</title>
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+
+  <div class="calculator-header">
+    <div class="header-left">
+      <img class="extensionIcon" src="../icons/logo.png" alt="Luna Icon">
+      <h1 id="extensionTitle">Luna</h1>
+    </div>
+    <a href="../html/mainMenu.html?fromBack=true" class="back-button" title="Back to Main Menu">← Back</a>
+  </div>
+
+  <div id="needFormatterPage" class="page-container">
+
+    <div class="card">
+      <div class="help-icon">?
+        <span class="tooltip">Enter the ticket number and select the current invoice status (Paid or Posted).</span>
+      </div>
+      <div class="input-group">
+        <label for="ticketNumberInput">Ticket Number:</label>
+        <input type="text" id="ticketNumberInput" maxlength="8">
+      </div>
+      <div class="integrations-section">
+        <label>Invoice Status:</label>
+        <div class="toggle-buttons">
+          <button id="statusPaid" class="toggle-button selected" data-value="Paid">Paid</button>
+          <button id="statusPosted" class="toggle-button" data-value="Posted">Posted</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="help-icon">?
+        <span class="tooltip">Enter the details of the customer's request and their contact information. All fields are optional but recommended.</span>
+      </div>
+      <div class="input-group">
+        <label for="customerRequestInput">Customer Request:</label>
+        <textarea id="customerRequestInput" rows="6"></textarea>
+      </div>
+      <div class="input-group">
+        <label for="customerEmailInput">Email:</label>
+        <input type="text" id="customerEmailInput">
+      </div>
+      <div class="input-group">
+        <label for="customerPhoneNumberInput">Phone Number:</label>
+        <input type="text" id="customerPhoneNumberInput">
+      </div>
+      <div class="input-group">
+        <label for="additionalCommentsInput">Additional Comments:</label>
+        <textarea id="additionalCommentsInput" rows="4"></textarea>
+      </div>
+    </div>
+
+    <div class="output-section card">
+      <div class="help-icon">?
+        <span class="tooltip">This is the formatted text ready to be copied. It updates automatically as you type in the fields above.</span>
+      </div>
+      <label>Formatted Output:</label>
+      <pre id="formattedOutput" class="display-box"></pre>
+      <button id="copyOutputBtn" class="menu-button complete-button">📋 Copy to Clipboard</button>
+    </div>
+
+  </div>
+
+  <!-- Calculator Footer Bar (Reusing for consistency, though only Copy button is in main area) -->
+  <div id="calculatorFooter" class="calculator-footer-bar">
+    <button id="clearAllBtn" class="footer-button clear-button">🗑️ Clear All</button>
+  </div>
+
+  <script type="module" src="../js/needFormater.js"></script>
+  <script type="module" src="../js/utils.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Record Log - Luna</title>
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+
+  <div class="calculator-header">
+    <div class="header-left">
+      <img class="extensionIcon" src="../icons/logo.png" alt="Luna Icon">
+      <h1 id="extensionTitle">Luna</h1>
+    </div>
+    <a href="../html/mainMenu.html?fromBack=true" class="back-button" title="Back to Main Menu">← Back</a>
+  </div>
+
+  <div id="recordLogPage" class="page-container">
+    <div class="record-log-list" id="recordLogList">
+      <!-- Record items will be dynamically loaded here by JS -->
+      <!-- "No records saved yet." message is also handled by JS -->
+    </div>
+  </div>
+
+  <div class="record-log-footer-bar">
+    <button id="downloadAllRecordsBtn" class="footer-button download-all-button">⬇️ Download All</button>
+  </div>
+
+  <script type="module" src="../js/quoteRecordLog.js"></script>
+  <script type="module" src="../js/utils.js"></script>
+</body>
+</html>
