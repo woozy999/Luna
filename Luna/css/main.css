@@ -104,7 +104,8 @@ body {
 #quoteCalculatorPage,
 #recordLogPage,
 #creditCalculatorPage,
-#needFormatterPage {
+#needFormatterPage,
+#mainMenuPage { /* MODIFIED: Added mainMenuPage to this rule */
     padding-bottom: calc(15px + var(--footer-height)); 
 }
 
@@ -193,7 +194,8 @@ body {
 /* --- Links acting as buttons (removed underlines) --- */
 .icon-button,
 .menu-button,
-.back-button {
+.back-button,
+.footer-button {  /* MODIFIED: added .footer-button */
   text-decoration: none; /* REMOVE UNDERLINE */
 }
 
@@ -235,13 +237,6 @@ body {
 
 
 /* --- MAIN MENU PAGE BUTTONS --- */
-#mainMenuPage .page-container {
-  padding-top: 20px; /* Add specific top padding for menu */
-  padding-bottom: 15px; /* Standard bottom padding as no fixed footer */
-  justify-content: flex-start; /* Align content to the top */
-}
-
-/* New: Styles for the main menu toggle buttons */
 .main-menu-toggle-buttons {
   display: flex;
   gap: 10px;
@@ -312,9 +307,6 @@ body {
 }
 
 /* --- QUOTE CALCULATOR FIELD STYLES --- */
-#quoteCalculatorPage .page-container {
-  /* No specific padding-top needed, header provides separation */
-}
 
 .input-group {
   display: flex;
@@ -506,9 +498,6 @@ body {
 
 
 /* --- SETTINGS PAGE STYLES --- */
-#settingsPage .page-container {
-    /* No specific padding-top needed, header provides separation */
-}
 
 .settings-group {
   margin-top: 0; /* Removed top margin as card provides spacing */
@@ -760,6 +749,19 @@ input[type="color"]::-moz-color-swatch {
   background-color: var(--complete-button-active);
 }
 
+/* NEW/MODIFIED STYLES FOR FEEDBACK BUTTON */
+.footer-button.feedback-button {
+  background-color: var(--complete-button-bg);
+  color: var(--complete-button-text);
+}
+
+.footer-button.feedback-button:hover,
+.footer-button.feedback-button:active {
+  background-color: var(--complete-button-bg); /* Keep the color static */
+  transform: none; /* Disable hover/active transform effects */
+}
+
+
 .footer-button.download-all-button {
   background-color: var(--download-all-button-bg);
   color: var(--text-light);
@@ -772,10 +774,6 @@ input[type="color"]::-moz-color-swatch {
 }
 
 /* --- RECORD LOG PAGE STYLES --- */
-/* Record log page container needs to account for its own fixed footer height */
-#recordLogPage .page-container {
-  padding-bottom: calc(15px + var(--footer-height));
-}
 
 .record-log-list {
   display: flex;
@@ -958,4 +956,21 @@ input[type="color"]::-moz-color-swatch {
 .action-button-inside:hover {
     color: var(--record-icon-hover);
     transform: scale(1.1);
+}
+
+.about-section .about-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9em;
+  color: var(--text-medium);
+}
+
+.about-info a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+.about-info a:hover {
+  text-decoration: underline;
 }

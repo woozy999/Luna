@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const brandingLunaBtn = document.getElementById('brandingLunaBtn');
   const brandingTeamViewerBtn = document.getElementById('brandingTeamViewerBtn');
   const resetAllButton = document.getElementById('resetAllButton');
+  const extensionVersion = document.getElementById('extensionVersion'); // NEW: Version span
 
   // --- Storage Keys ---
   const STORAGE_KEY_ZOOM = 'lunaZoomLevel';
@@ -229,6 +230,12 @@ document.addEventListener('DOMContentLoaded', () => {
    * This function ensures that settings are loaded consistently on page load.
    */
   function loadSettings() {
+    // NEW: Load manifest version
+    if (extensionVersion) {
+        const manifest = chrome.runtime.getManifest();
+        extensionVersion.textContent = manifest.version;
+    }
+
     chrome.storage.local.get(
       [STORAGE_KEY_ZOOM, STORAGE_KEY_LUNA_TITLE_VISIBLE, STORAGE_KEY_ADVANCED_MODE, STORAGE_KEY_THEME_MODE, STORAGE_KEY_ACCENT_COLOR, STORAGE_KEY_TEXT_COLOR, STORAGE_KEY_BRANDING_MODE],
       (result) => {
