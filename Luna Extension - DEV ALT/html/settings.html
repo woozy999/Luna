@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Settings - Luna</title>
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+
+  <div class="calculator-header">
+    <div class="header-left">
+      <img class="extensionIcon" src="../icons/logo.png" alt="Luna Icon">
+      <h1 id="extensionTitle">Luna</h1>
+    </div>
+    <a href="../html/mainMenu.html?fromBack=true" class="back-button" title="Back to Main Menu">← Back</a>
+  </div>
+
+  <div id="settingsPage" class="page-container">
+
+    <div class="settings-group card">
+      <label>Zoom</label>
+      <div class="magnification-options">
+        <input type="range" id="zoomSlider" min="0.7" max="1.5" step="0.01" value="1.0">
+        <span id="zoomValueDisplay">100%</span>
+      </div>
+    </div>
+
+    <!-- <div class="settings-group card">
+      <label>Luna Title Visibility</label>
+      <div class="toggle-buttons">
+        <button id="lunaTitleVisible" class="toggle-button selected" data-value="visible">Visible</button>
+        <button id="lunaTitleHidden" class="toggle-button" data-value="hidden">Hidden</button>
+      </div>
+    </div>
+    -->
+
+    <div class="settings-group card">
+      <label>Advanced Mode</label>
+      <div class="toggle-buttons">
+        <button id="advancedModeEnabledBtn" class="toggle-button" data-value="enabled">Enabled</button>
+        <button id="advancedModeDisabledBtn" class="toggle-button selected" data-value="disabled">Disabled</button>
+      </div>
+    </div>
+
+    <div class="settings-group card">
+      <label>Branding</label>
+      <div class="toggle-buttons">
+        <button id="brandingLunaBtn" class="toggle-button" data-value="luna">Luna</button>
+        <button id="brandingTeamViewerBtn" class="toggle-button" data-value="teamviewer">TeamViewer</button>
+      </div>
+    </div>
+
+    <div class="settings-group card">
+      <label>Theme</label>
+      <div class="theme-options">
+        <label>Mode</label>
+        <div class="toggle-buttons">
+          <button id="themeModeDarkBtn" class="toggle-button" data-mode="dark">Dark</button>
+          <button id="themeModeLightBtn" class="toggle-button" data-mode="light">Light</button>
+        </div>
+        <div class="color-picker-group">
+          <label for="accentColorPicker">Accent Color</label>
+          <input type="color" id="accentColorPicker">
+        </div>
+        <div class="color-picker-group">
+          <label for="textColorPicker">Highlight Text Color</label>
+          <input type="color" id="textColorPicker">
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-group card about-section">
+        <label>About Luna</label>
+        <div class="about-info">
+            <span>Version: <span id="extensionVersion">...</span></span>
+            <a href="https://github.com/woozy999/Luna" target="_blank" rel="noopener noreferrer">Source Code</a>
+        </div>
+    </div>
+
+    <div class="settings-group">
+      <button id="resetAllButton" class="menu-button reset-button">Reset All Settings & Data</button>
+    </div>
+
+  </div>
+
+  <script type="module" src="../js/settings.js"></script>
+  <script type="module" src="../js/utils.js"></script>
+</body>
+</html>

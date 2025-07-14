@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Credit Calculator - Luna</title>
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+
+  <div class="calculator-header">
+    <div class="header-left">
+      <img class="extensionIcon" src="../icons/logo.png" alt="Luna Icon">
+      <h1 id="extensionTitle">Luna</h1>
+    </div>
+    <a href="../html/mainMenu.html?fromBack=true" class="back-button" title="Back to Main Menu">← Back</a>
+  </div>
+
+  <div id="creditCalculatorPage" class="page-container">
+
+    <div class="card">
+      <div class="help-icon">?
+        <span class="tooltip">Enter the original license amount and the date the license was purchased.</span>
+      </div>
+      <div class="input-group">
+        <label for="creditAmountInput">Amount:</label>
+        <input type="text" id="creditAmountInput" inputmode="decimal" placeholder="$0.00">
+      </div>
+      <div class="input-group">
+        <label for="purchaseDateInput">Date of Purchase:</label>
+        <input type="text" id="purchaseDateInput" placeholder="mm/dd/yyyy">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="help-icon">?
+        <span class="tooltip">Choose the date to calculate from (Today or a Custom Date) and set the total license duration (1, 2, or 3 years).</span>
+      </div>
+      <div class="integrations-section">
+        <label>Calculate From</label>
+        <div class="toggle-buttons">
+          <button id="calcFromTodayBtn" class="toggle-button selected" data-type="today">Today</button>
+          <button id="calcFromCustomBtn" class="toggle-button" data-type="custom">Custom</button>
+        </div>
+      </div>
+      <div id="calculationDateContainer">
+        <div id="todaysDateDisplay" class="display-group">
+          <label>Today's Date:</label>
+          <div class="display-box" id="todaysDateValue">N/A</div>
+        </div>
+        <div id="customDateGroup" class="input-group hidden">
+          <label for="calculationDateInput">Calculation Date:</label>
+          <input type="text" id="calculationDateInput" placeholder="mm/dd/yyyy">
+        </div>
+      </div>
+      <div class="integrations-section">
+        <label>License Duration</label>
+        <div class="toggle-buttons">
+          <button id="duration1yr" class="toggle-button selected" data-years="1">1yr</button>
+          <button id="duration2yr" class="toggle-button" data-years="2">2yr</button>
+          <button id="duration3yr" class="toggle-button" data-years="3">3yr</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="help-icon">?
+        <span class="tooltip">
+          <b>Expiration Date:</b> [Purchase Date] + [License Duration]<br><br>
+          <b>Days Remaining:</b> [Expiration Date] - [Calculation Start Date]<br><br>
+          <b>Credit per Day:</b> [Amount] / ([Duration] * 365)<br><br>
+          <b>Total Credit:</b> [Credit per Day] * [Days Remaining]
+        </span>
+      </div>
+      <div id="expirationDateDisplay" class="display-group">
+        <label>Expiration Date:</label>
+        <div class="display-box" id="expirationDateValue">N/A</div>
+      </div>
+      <div id="daysRemainingDisplay" class="display-group">
+        <label>Days Remaining:</label>
+        <div class="display-box" id="daysRemainingValue">N/A</div>
+      </div>
+      <div id="creditPerDayDisplay" class="display-group advanced-display hidden">
+        <label>Credit per Day <span class="advanced-tag">(ADVANCED)</span>:</label>
+        <div class="display-box" id="creditPerDayValue">$0.00</div>
+      </div>
+      <div class="display-group">
+        <label>Total Credit Remaining:</label>
+        <div class="display-box-with-button">
+            <span id="totalCreditValue">$0.00</span>
+            <button id="copyCreditBtn" class="action-button-inside" title="Copy Amount">📋</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="help-icon">?
+        <span class="tooltip">
+          Enter the cost original cost of the new updated / consolidated license. The calculator will automatically subtract the remaining credit to show the final amount the customer owes.<br><br>
+          <b>Formula:</b> [New License Cost] - [Total Credit Remaining]
+        </span>
+      </div>
+      <div class="input-group">
+        <label for="newLicenseCostInput">Original Total Cost:</label>
+        <input type="text" id="newLicenseCostInput" inputmode="decimal" placeholder="$0.00">
+      </div>
+      <div class="display-group">
+        <label>Final Price w/ Prorated Credit:</label>
+        <div class="display-box-with-button">
+            <span id="whatTheyOweValue">$0.00</span>
+            <button id="copyOwedBtn" class="action-button-inside" title="Copy Amount">📋</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="calculatorFooter" class="calculator-footer-bar">
+    <button id="clearAllBtn" class="footer-button clear-button">🗑️ Clear All</button>
+  </div>
+
+  <script type="module" src="../js/creditCalculator.js"></script>
+  <script type="module" src="../js/utils.js"></script>
+</body>
+</html>
