@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY_TEXT_COLOR = 'lunaTextColor';
   const STORAGE_KEY_ADVANCED_MODE = 'lunaAdvancedModeEnabled'; // Global settings
   const STORAGE_KEY_BRANDING_MODE = 'lunaBrandingMode'; // ADDED: New storage key
+  const STORAGE_KEY_CARD_STATES = 'lunaQuoteCardStates'; // For collapsible cards
 
   // --- Global State Variables ---
   let isAdvancedModeEnabled = false; // Tracks the current state of advanced mode
@@ -442,6 +443,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /**
+   * Initializes all collapsible cards on the page.
+   */
+  function initializeCollapsibleCards() {
+    chrome.storage.local.get([STORAGE_KEY_CARD_STATES], (result) => {
+        const cardStates = result[STORAGE_KEY_CARD_STATES] || {};
+        
+        document.querySelectorAll('.card').forEach(card => {
+            const cardId = card.id;
+            if (!cardId) return;
+
+            const toggle = card.querySelector('.collapse-toggle');
+            if (!toggle) return;
+
+            // Set initial state from storage
+            if (cardStates[cardId] === true) { // if true, it's collapsed
+                card.classList.add('collapsed');
+            }
+
+            // Add click listener
+            toggle.addEventListener('click', () => {
+                const isCollapsed = card.classList.toggle('collapsed');
+                cardStates[cardId] = isCollapsed;
+                chrome.storage.local.set({ [STORAGE_KEY_CARD_STATES]: cardStates });
+            });
+        });
+    });
+  }
+
   // --- Event Listeners ---
   if (companyNameInput) companyNameInput.addEventListener('input', saveCalculatorInputs);
   if (erpLinkInput) erpLinkInput.addEventListener('input', saveCalculatorInputs);
@@ -478,4 +508,5 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Initial Setup on DOM Load ---
   loadGlobalSettings();
   loadCalculatorInputs();
+  initializeCollapsibleCards();
 });

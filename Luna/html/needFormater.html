@@ -17,52 +17,76 @@
 
   <div id="needFormatterPage" class="page-container">
 
-    <div class="card">
-      <div class="help-icon">?
-        <span class="tooltip">Enter the ticket number and select the current invoice status (Paid or Posted).</span>
+    <div class="card" id="card-need-info">
+      <div class="card-header">
+        <span class="card-header-title">Ticket Data</span>
+        <div class="card-header-actions">
+          <button class="collapse-toggle" title="Toggle Section">▼</button>
+          <div class="help-icon">?
+            <span class="tooltip">Enter the ticket number and select the current invoice status (Paid or Posted).</span>
+          </div>
+        </div>
       </div>
-      <div class="input-group">
-        <label for="ticketNumberInput">Ticket Number:</label>
-        <input type="text" id="ticketNumberInput" maxlength="8">
-      </div>
-      <div class="integrations-section">
-        <label>Invoice Status:</label>
-        <div class="toggle-buttons">
-          <button id="statusPaid" class="toggle-button selected" data-value="Paid">Paid</button>
-          <button id="statusPosted" class="toggle-button" data-value="Posted">Posted</button>
+      <div class="card-content">
+        <div class="input-group">
+          <label for="ticketNumberInput">Ticket #:</label>
+          <input type="text" id="ticketNumberInput" maxlength="8">
+        </div>
+        <div class="integrations-section">
+          <label>Invoice Status:</label>
+          <div class="toggle-buttons">
+            <button id="statusPaid" class="toggle-button selected" data-value="Paid">Paid</button>
+            <button id="statusPosted" class="toggle-button" data-value="Posted">Posted</button>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="help-icon">?
-        <span class="tooltip">Enter the details of the customer's request and their contact information. All fields are optional but recommended.</span>
+    <div class="card" id="card-need-details">
+      <div class="card-header">
+        <span class="card-header-title">Customer Info</span>
+        <div class="card-header-actions">
+          <button class="collapse-toggle" title="Toggle Section">▼</button>
+          <div class="help-icon">?
+            <span class="tooltip">Enter the details of the customer's request and their contact information. All fields are optional but recommended.</span>
+          </div>
+        </div>
       </div>
-      <div class="input-group">
-        <label for="customerRequestInput">Customer Request:</label>
-        <textarea id="customerRequestInput" rows="6"></textarea>
-      </div>
-      <div class="input-group">
-        <label for="customerEmailInput">Email:</label>
-        <input type="text" id="customerEmailInput">
-      </div>
-      <div class="input-group">
-        <label for="customerPhoneNumberInput">Phone Number:</label>
-        <input type="text" id="customerPhoneNumberInput">
-      </div>
-      <div class="input-group">
-        <label for="additionalCommentsInput">Additional Comments:</label>
-        <textarea id="additionalCommentsInput" rows="4"></textarea>
+      <div class="card-content">
+        <div class="input-group">
+          <label for="customerRequestInput">Customer Request:</label>
+          <textarea id="customerRequestInput" rows="6"></textarea>
+        </div>
+        <div class="input-group">
+          <label for="customerEmailInput">Email:</label>
+          <input type="text" id="customerEmailInput">
+        </div>
+        <div class="input-group">
+          <label for="customerPhoneNumberInput">Phone Number:</label>
+          <input type="text" id="customerPhoneNumberInput">
+        </div>
+        <div class="input-group">
+          <label for="additionalCommentsInput">Additional Comments:</label>
+          <textarea id="additionalCommentsInput" rows="4"></textarea>
+        </div>
       </div>
     </div>
 
-    <div class="output-section card">
-      <div class="help-icon">?
-        <span class="tooltip">This is the formatted text ready to be copied. It updates automatically as you type in the fields above.</span>
+    <div class="output-section card" id="card-need-output">
+      <div class="card-header">
+        <span class="card-header-title">Output</span>
+        <div class="card-header-actions">
+          <button class="collapse-toggle" title="Toggle Section">▼</button>
+          <div class="help-icon">?
+            <span class="tooltip">This is the formatted text ready to be copied. It updates automatically as you type in the fields above.</span>
+          </div>
+        </div>
       </div>
-      <label>Formatted Output:</label>
-      <pre id="formattedOutput" class="display-box"></pre>
-      <button id="copyOutputBtn" class="menu-button complete-button">📋 Copy to Clipboard</button>
+      <div class="card-content">
+        <!-- <label>Formatted Output:</label> -->
+        <pre id="formattedOutput" class="display-box"></pre>
+        <button id="copyOutputBtn" class="menu-button complete-button">📋 Copy to Clipboard</button>
+      </div>
     </div>
 
   </div>

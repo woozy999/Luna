@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY_TEXT_COLOR = 'lunaTextColor';
   const STORAGE_KEY_ADVANCED_MODE = 'lunaAdvancedModeEnabled';
   const STORAGE_KEY_BRANDING_MODE = 'lunaBrandingMode';
+  const STORAGE_KEY_CARD_STATES = 'lunaCreditCardStates'; // For collapsible cards
 
   // --- Global State ---
   let isAdvancedModeEnabled = false;
@@ -164,6 +165,14 @@ document.addEventListener('DOMContentLoaded', () => {
     );
   }
 
+  /**
+   * NEW: Validates required fields and adds/removes an error class.
+   */
+  function validateRequiredFields() {
+    amountInput.classList.toggle('input-error', !amountInput.value.trim());
+    dateInput.classList.toggle('input-error', !dateInput.value.trim());
+  }
+
   function calculateAndDisplay() {
     console.log(`[DEBUG] 5. calculateAndDisplay running. Advanced mode is currently: ${isAdvancedModeEnabled}`);
     
@@ -249,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
         button.classList.toggle('selected', isSelected);
       });
       
+      validateRequiredFields(); // MOVED: Validate AFTER inputs are loaded
       calculateAndDisplay();
     });
   }
@@ -260,7 +270,8 @@ document.addEventListener('DOMContentLoaded', () => {
     newLicenseCostInput.value = ''; // NEW
     durationButtons.forEach(button => button.classList.toggle('selected', button.dataset.years === '1'));
     
-    setCalculationDateType('today'); 
+    setCalculationDateType('today');
+    validateRequiredFields(); // Re-apply red border after clearing
   }
 
   function copyCreditAmount() {
@@ -304,9 +315,41 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 
+  /**
+   * Initializes all collapsible cards on the page.
+   */
+  function initializeCollapsibleCards() {
+    chrome.storage.local.get([STORAGE_KEY_CARD_STATES], (result) => {
+        const cardStates = result[STORAGE_KEY_CARD_STATES] || {};
+        
+        document.querySelectorAll('.card').forEach(card => {
+            const cardId = card.id;
+            if (!cardId) return;
+
+            const toggle = card.querySelector('.collapse-toggle');
+            if (!toggle) return;
+
+            // Set initial state from storage
+            if (cardStates[cardId] === true) { // if true, it's collapsed
+                card.classList.add('collapsed');
+            }
+
+            // Add click listener
+            toggle.addEventListener('click', () => {
+                const isCollapsed = card.classList.toggle('collapsed');
+                cardStates[cardId] = isCollapsed;
+                chrome.storage.local.set({ [STORAGE_KEY_CARD_STATES]: cardStates });
+            });
+        });
+    });
+  }
 
   // --- Event Listeners ---
-  [amountInput, dateInput, calculationDateInput, newLicenseCostInput].forEach(input => input.addEventListener('input', () => { calculateAndDisplay(); saveInputs(); }));
+  [amountInput, dateInput, calculationDateInput, newLicenseCostInput].forEach(input => input.addEventListener('input', () => {
+    validateRequiredFields(); // Validate on every input change
+    calculateAndDisplay();
+    saveInputs();
+  }));
   
   [amountInput, newLicenseCostInput].forEach(input => {
     input.addEventListener('blur', () => { 
@@ -332,5 +375,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Initial Setup ---
   todaysDateValue.textContent = new Date().toLocaleDateString();
   loadGlobalSettings();
-  loadInputs();
+  loadInputs(); // This function now handles the initial validation
+  initializeCollapsibleCards(); // Initialize collapsible sections
 });
