@@ -3,11 +3,11 @@
 /**
  * Credit Calculator script for the Luna Chrome Extension.
  * Calculates remaining credit based on an amount and purchase date.
+ * Supports both a single line and multi-line calculation mode.
  */
 
-import { formatCurrencyDisplay, parseCurrencyInput } from './utils.js';
+import { formatCurrencyDisplay, parseCurrencyInput, hexToRgba } from './utils.js';
 
-// ADDED: Utility function to save the current page to storage
 function saveCurrentPage(pagePath) {
     chrome.runtime.sendMessage({ type: 'saveSetting', payload: { key: 'lunaLastPage', value: pagePath } });
 }
@@ -15,14 +15,28 @@ function saveCurrentPage(pagePath) {
 document.addEventListener('DOMContentLoaded', () => {
   saveCurrentPage('/html/creditCalculator.html');
 
-  console.log('[DEBUG] 1. DOM Content Loaded. Initializing script.');
-
   // --- Element References ---
   const lunaTitle = document.getElementById('extensionTitle');
+  const clearAllBtn = document.getElementById('clearAllBtn');
+
+  // View Toggling
+  const singleLineToggleBtn = document.getElementById('singleLineToggleBtn');
+  const multiLineToggleBtn = document.getElementById('multiLineToggleBtn');
+  const singleLineContainer = document.getElementById('singleLineContainer');
+  const multiLineContainer = document.getElementById('multiLineContainer');
+  const singleLineDurationSection = document.getElementById('singleLineDurationSection');
+
+  // Single Line Inputs
   const amountInput = document.getElementById('creditAmountInput');
   const dateInput = document.getElementById('purchaseDateInput');
   const durationButtons = document.querySelectorAll('#duration1yr, #duration2yr, #duration3yr');
+
+  // Multi Line Inputs & Template
+  const lineItemsContainer = document.getElementById('lineItemsContainer');
+  const addLineBtn = document.getElementById('addLineBtn');
+  const lineItemTemplate = document.getElementById('lineItemTemplate');
   
+  // Global Calculation Options
   const calcFromTodayBtn = document.getElementById('calcFromTodayBtn');
   const calcFromCustomBtn = document.getElementById('calcFromCustomBtn');
   const todaysDateDisplay = document.getElementById('todaysDateDisplay');
@@ -30,70 +44,62 @@ document.addEventListener('DOMContentLoaded', () => {
   const calculationDateInput = document.getElementById('calculationDateInput');
   const todaysDateValue = document.getElementById('todaysDateValue');
 
+  // Results & Upgrade
+  const expirationDateDisplay = document.getElementById('expirationDateDisplay');
+  const daysRemainingDisplay = document.getElementById('daysRemainingDisplay');
   const expirationDateValue = document.getElementById('expirationDateValue');
   const daysRemainingValue = document.getElementById('daysRemainingValue');
   const creditPerDayDisplay = document.getElementById('creditPerDayDisplay');
   const creditPerDayValue = document.getElementById('creditPerDayValue');
   const totalCreditValue = document.getElementById('totalCreditValue');
-  
-  const clearAllBtn = document.getElementById('clearAllBtn');
   const copyCreditBtn = document.getElementById('copyCreditBtn');
-
-  // NEW: Upgrade section elements
   const newLicenseCostInput = document.getElementById('newLicenseCostInput');
   const whatTheyOweValue = document.getElementById('whatTheyOweValue');
   const copyOwedBtn = document.getElementById('copyOwedBtn');
 
-
   // --- Storage Keys ---
   const STORAGE_KEY_INPUTS = 'lunaCreditCalculatorInputs';
   const STORAGE_KEY_ZOOM = 'lunaZoomLevel';
-  const STORAGE_KEY_LUNA_TITLE_VISIBLE = 'lunaTitleVisible';
   const STORAGE_KEY_THEME_MODE = 'lunaThemeMode';
   const STORAGE_KEY_ACCENT_COLOR = 'lunaAccentColor';
-  const STORAGE_KEY_TEXT_COLOR = 'lunaTextColor';
   const STORAGE_KEY_ADVANCED_MODE = 'lunaAdvancedModeEnabled';
   const STORAGE_KEY_BRANDING_MODE = 'lunaBrandingMode';
-  const STORAGE_KEY_CARD_STATES = 'lunaCreditCardStates'; // For collapsible cards
+  const STORAGE_KEY_CARD_STATES = 'lunaCreditCardStates';
 
   // --- Global State ---
   let isAdvancedModeEnabled = false;
 
   const defaultInputs = {
+    activeView: 'single',
+    // Single line data
     amount: '',
     purchaseDate: '',
     duration: 1,
+    // Multi line data
+    multiLineItems: [],
+    // Global data
     calculationType: 'today',
     calculationDate: '',
-    newLicenseCost: '' // NEW
+    newLicenseCost: ''
   };
+  
+  const defaultThemeMode = 'dark';
+  const defaultAccentColor = '#3B82F6';
+  const defaultBrandingMode = 'luna';
 
-  /**
-   * Applies the selected theme mode and colors to the document.
-   * @param {string} mode - 'dark' or 'light'.
-   * @param {string} accentColor - The hex code for the accent color.
-   * @param {string} textColor - The hex code for the highlight text color.
-   */
-  function applyTheme(mode, accentColor, textColor) {
+  // --- Global Settings Functions ---
+  function applyTheme(mode, accentColor) {
     const body = document.body;
     const root = document.documentElement;
     body.classList.toggle('theme-dark', mode === 'dark');
     body.classList.toggle('theme-light', mode === 'light');
-    root.style.setProperty('--accent-color', accentColor);
-    root.style.setProperty('--text-highlight-color', textColor);
+    root.style.setProperty('--primary-accent', accentColor);
+    root.style.setProperty('--primary-accent-shadow', hexToRgba(accentColor, 0.2));
   }
 
-  /**
-   * Sets the branding mode (Luna or TeamViewer) and updates UI elements.
-   * This function is needed on every page to ensure consistent branding.
-   * @param {string} brandingMode - 'luna' or 'teamviewer'.
-   * @param {string} themeMode - 'dark' or 'light'.
-   * @param {boolean} [shouldSave=false] - Whether to save the setting to storage (only settings page saves).
-   */
-  function setBrandingMode(brandingMode, themeMode, shouldSave = false) {
+  function setBrandingMode(brandingMode, themeMode) {
     const extensionIcon = document.querySelector('.extensionIcon');
-    const extensionTitle = document.getElementById('extensionTitle'); // 'Luna' text
-
+    const extensionTitle = document.getElementById('extensionTitle');
     if (extensionIcon) {
       extensionIcon.src = brandingMode === 'luna' ? '../icons/logo.png' : '../icons/tvicon.png';
       extensionIcon.classList.toggle('inverted', brandingMode === 'teamviewer' && themeMode === 'dark');
@@ -101,113 +107,142 @@ document.addEventListener('DOMContentLoaded', () => {
     if (extensionTitle) {
       extensionTitle.classList.toggle('hidden-title', brandingMode === 'teamviewer');
     }
-
-    if (shouldSave && typeof chrome !== 'undefined' && chrome.runtime) {
-      chrome.runtime.sendMessage({ type: 'saveSetting', payload: { key: STORAGE_KEY_BRANDING_MODE, value: brandingMode } });
-    }
+  }
+  
+  function applyZoom(zoomLevel) {
+    document.body.style.zoom = zoomLevel;
   }
 
-  /**
-   * Sets advanced mode state AND triggers a recalculation.
-   */
   function setAdvancedMode(isEnabled) {
-    console.log(`[DEBUG] 4. setAdvancedMode called with: ${isEnabled}`);
     isAdvancedModeEnabled = isEnabled;
+    document.body.classList.toggle('advanced-mode-on', isEnabled);
     calculateAndDisplay();
   }
   
-  /**
-   * Sets the type of date to use for calculation ('today' or 'custom') and updates the UI.
-   * @param {string} type - The calculation date type to set.
-   * @param {boolean} [shouldSaveAndCalc=true] - Whether to save and recalculate.
-   */
-  function setCalculationDateType(type, shouldSaveAndCalc = true) {
-    const isToday = type === 'today';
-    
-    calcFromTodayBtn.classList.toggle('selected', isToday);
-    calcFromCustomBtn.classList.toggle('selected', !isToday);
-    
-    todaysDateDisplay.classList.toggle('hidden', !isToday);
-    customDateGroup.classList.toggle('hidden', isToday);
-    
-    todaysDateDisplay.classList.toggle('calculation-date-active', isToday);
-    customDateGroup.classList.toggle('calculation-date-active', !isToday);
-
-    if (shouldSaveAndCalc) {
-      calculateAndDisplay();
-      saveInputs();
-    }
-  }
-
   function loadGlobalSettings() {
-    console.log('[DEBUG] 2a. Starting to load global settings from storage...');
     chrome.storage.local.get(
-      [STORAGE_KEY_ZOOM, STORAGE_KEY_LUNA_TITLE_VISIBLE, STORAGE_KEY_THEME_MODE, STORAGE_KEY_ACCENT_COLOR, STORAGE_KEY_TEXT_COLOR, STORAGE_KEY_ADVANCED_MODE, STORAGE_KEY_BRANDING_MODE],
+      [STORAGE_KEY_ZOOM, STORAGE_KEY_THEME_MODE, STORAGE_KEY_ACCENT_COLOR, STORAGE_KEY_ADVANCED_MODE, STORAGE_KEY_BRANDING_MODE],
       (result) => {
-        const advancedMode = result[STORAGE_KEY_ADVANCED_MODE] === true;
-        console.log(`[DEBUG] 3a. Global settings LOADED. Advanced Mode is: ${advancedMode}`);
+        const mode = result[STORAGE_KEY_THEME_MODE] || defaultThemeMode;
+        const accent = result[STORAGE_KEY_ACCENT_COLOR] || defaultAccentColor;
+        applyTheme(mode, accent);
         
-        applyTheme(result[STORAGE_KEY_THEME_MODE] || 'dark', result[STORAGE_KEY_ACCENT_COLOR] || '#51a3f9', result[STORAGE_KEY_TEXT_COLOR] || '#ed5653');
-        document.body.style.zoom = parseFloat(result[STORAGE_KEY_ZOOM]) || 1.0;
+        const zoom = parseFloat(result[STORAGE_KEY_ZOOM]) || 1.0;
+        applyZoom(zoom);
         
-        const brandingMode = result[STORAGE_KEY_BRANDING_MODE] || 'luna';
-        const mode = result[STORAGE_KEY_THEME_MODE] || 'dark';
+        const brandingMode = result[STORAGE_KEY_BRANDING_MODE] || defaultBrandingMode;
         setBrandingMode(brandingMode, mode);
-
-        if (lunaTitle) {
-          const hideBasedOnSetting = result[STORAGE_KEY_LUNA_TITLE_VISIBLE] === false;
-          const hideBasedOnBranding = brandingMode === 'teamviewer';
-          lunaTitle.classList.toggle('hidden-title', hideBasedOnSetting || hideBasedOnBranding);
-        }
-
+        
+        const advancedMode = result[STORAGE_KEY_ADVANCED_MODE] === true;
         setAdvancedMode(advancedMode);
       }
     );
   }
 
-  /**
-   * NEW: Validates required fields and adds/removes an error class.
-   */
-  function validateRequiredFields() {
-    amountInput.classList.toggle('input-error', !amountInput.value.trim());
-    dateInput.classList.toggle('input-error', !dateInput.value.trim());
+  // --- View Management ---
+  function setView(viewName, shouldSave = true) {
+    const isSingle = viewName === 'single';
+
+    singleLineToggleBtn.classList.toggle('selected', isSingle);
+    multiLineToggleBtn.classList.toggle('selected', !isSingle);
+
+    singleLineContainer.classList.toggle('hidden', !isSingle);
+    multiLineContainer.classList.toggle('hidden', isSingle);
+    
+    // Show/hide fields that are only relevant to single line view
+    expirationDateDisplay.classList.toggle('hidden', !isSingle);
+    daysRemainingDisplay.classList.toggle('hidden', !isSingle);
+    
+    if (shouldSave) {
+        saveInputs();
+    }
+    calculateAndDisplay();
   }
 
-  function calculateAndDisplay() {
-    console.log(`[DEBUG] 5. calculateAndDisplay running. Advanced mode is currently: ${isAdvancedModeEnabled}`);
+  // --- Multi-Line Item Functions ---
+  function addNewLine(data = { name: '', amount: '', startDate: '', duration: 1, endDate: '' }) {
+    const fragment = lineItemTemplate.content.cloneNode(true);
+    const lineItem = fragment.querySelector('.line-item');
     
-    if (creditPerDayDisplay) {
-      creditPerDayDisplay.classList.toggle('hidden', !isAdvancedModeEnabled);
-    } else {
-      console.error("[DEBUG] 'creditPerDayDisplay' element not found!");
-    }
-      
-    const amount = parseCurrencyInput(amountInput.value) || 0;
-    const purchaseDateStr = dateInput.value;
-    const selectedDuration = parseInt(document.querySelector('.toggle-button.selected[data-years]').dataset.years, 10);
-    const purchaseDate = new Date(purchaseDateStr);
+    const nameInput = lineItem.querySelector('.line-name');
+    const amountInput = lineItem.querySelector('.line-amount');
+    const startDateInput = lineItem.querySelector('.line-start-date');
+    const durationSelect = lineItem.querySelector('.line-duration');
+    const endDateInput = lineItem.querySelector('.line-end-date');
+    const deleteBtn = lineItem.querySelector('.delete-line-btn');
 
+    nameInput.value = data.name;
+    amountInput.value = formatCurrencyDisplay(data.amount);
+    startDateInput.value = data.startDate;
+    durationSelect.value = data.duration;
+    endDateInput.value = data.endDate;
+
+    // Add event listeners
+    [nameInput, startDateInput, endDateInput].forEach(input => {
+        input.addEventListener('input', () => { calculateAndDisplay(); saveInputs(); });
+    });
+    amountInput.addEventListener('input', () => { calculateAndDisplay(); saveInputs(); });
+    amountInput.addEventListener('blur', () => { amountInput.value = formatCurrencyDisplay(amountInput.value); });
+    durationSelect.addEventListener('change', () => { calculateAndDisplay(); saveInputs(); });
+    
+    deleteBtn.addEventListener('click', () => {
+        lineItem.remove();
+        calculateAndDisplay();
+        saveInputs();
+    });
+
+    lineItemsContainer.appendChild(lineItem);
+  }
+
+
+  // --- Calculation Logic ---
+  function calculateAndDisplay() {
+    creditPerDayDisplay.classList.toggle('hidden', !isAdvancedModeEnabled);
+
+    const activeView = singleLineToggleBtn.classList.contains('selected') ? 'single' : 'multi';
+    const calculationStartDate = getCalculationStartDate();
+    let totalCredit = 0;
+    
+    if (activeView === 'single') {
+        totalCredit = calculateSingleLine(calculationStartDate);
+    } else {
+        totalCredit = calculateMultiLine(calculationStartDate);
+    }
+
+    totalCreditValue.textContent = formatCurrencyDisplay(totalCredit);
+    calculateUpgrade(totalCredit);
+  }
+
+  function getCalculationStartDate() {
     const isCustomDateMode = calcFromCustomBtn.classList.contains('selected');
     const customDate = new Date(calculationDateInput.value);
+    const calculationDate = (isCustomDateMode && !isNaN(customDate.getTime())) ? customDate : new Date();
+    calculationDate.setHours(0, 0, 0, 0); 
+    return calculationDate;
+  }
+  
+  function calculateSingleLine(calculationStartDate) {
+    // Re-added validation for single line inputs
+    amountInput.classList.toggle('input-error', !amountInput.value.trim());
+    dateInput.classList.toggle('input-error', !dateInput.value.trim());
 
-    // Reset upgrade section if main calculation is invalid
-    if (amount <= 0 || !purchaseDateStr || isNaN(purchaseDate.getTime()) || (isCustomDateMode && isNaN(customDate.getTime()))) {
+    const amount = parseCurrencyInput(amountInput.value) || 0;
+    const purchaseDateStr = dateInput.value;
+    const selectedDuration = parseInt(document.querySelector('#singleLineDurationSection .toggle-button.selected[data-years]').dataset.years, 10);
+    const purchaseDate = new Date(purchaseDateStr);
+
+    if (amount <= 0 || !purchaseDateStr || isNaN(purchaseDate.getTime())) {
       expirationDateValue.textContent = 'N/A';
       daysRemainingValue.textContent = 'N/A';
       creditPerDayValue.textContent = formatCurrencyDisplay(0);
-      totalCreditValue.textContent = formatCurrencyDisplay(0);
-      whatTheyOweValue.textContent = formatCurrencyDisplay(0); // Also reset this
-      return;
+      return 0;
     }
-    
-    const calculationStartDate = isCustomDateMode ? customDate : new Date();
 
     const msPerDay = 1000 * 60 * 60 * 24;
     const expirationDate = new Date(purchaseDate.getTime());
-    expirationDate.setDate(expirationDate.getDate() + (selectedDuration * 365));
+    expirationDate.setFullYear(expirationDate.getFullYear() + selectedDuration);
     expirationDateValue.textContent = expirationDate.toLocaleDateString();
     
-    calculationStartDate.setHours(0, 0, 0, 0); 
     const expirationDayOnly = new Date(expirationDate.getFullYear(), expirationDate.getMonth(), expirationDate.getDate());
     const daysRemaining = Math.max(0, Math.round((expirationDayOnly - calculationStartDate) / msPerDay));
     daysRemainingValue.textContent = daysRemaining;
@@ -216,125 +251,181 @@ document.addEventListener('DOMContentLoaded', () => {
     const creditPerDay = totalDaysInTerm > 0 ? amount / totalDaysInTerm : 0;
     creditPerDayValue.textContent = formatCurrencyDisplay(creditPerDay);
 
-    const totalCredit = creditPerDay * daysRemaining;
-    totalCreditValue.textContent = formatCurrencyDisplay(totalCredit);
+    return creditPerDay * daysRemaining;
+  }
 
-    // --- NEW: Upgrade Calculation ---
+  function calculateMultiLine(calculationStartDate) {
+      let grandTotalCredit = 0;
+      const lineItems = lineItemsContainer.querySelectorAll('.line-item');
+
+      lineItems.forEach(item => {
+          const amountInput = item.querySelector('.line-amount');
+          const startDateInput = item.querySelector('.line-start-date');
+          const durationSelect = item.querySelector('.line-duration');
+          const endDateInput = item.querySelector('.line-end-date');
+          const creditDisplay = item.querySelector('.line-credit-display');
+
+          const amount = parseCurrencyInput(amountInput.value) || 0;
+          const startDate = new Date(startDateInput.value);
+          const duration = parseInt(durationSelect.value, 10);
+
+          // Auto-calculate end date if start and duration are valid
+          if (!isNaN(startDate.getTime())) {
+              const calculatedEndDate = new Date(startDate);
+              calculatedEndDate.setFullYear(calculatedEndDate.getFullYear() + duration);
+              // Only update if the user hasn't typed in it
+              if (!endDateInput.value) {
+                endDateInput.placeholder = calculatedEndDate.toLocaleDateString();
+              }
+          }
+
+          const endDate = new Date(endDateInput.value || endDateInput.placeholder);
+          
+          amountInput.classList.toggle('input-error', amount <= 0);
+          startDateInput.classList.toggle('input-error', isNaN(startDate.getTime()));
+
+          if (amount <= 0 || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+              creditDisplay.textContent = formatCurrencyDisplay(0);
+              return;
+          }
+          
+          const msPerDay = 1000 * 60 * 60 * 24;
+          const totalDaysInTerm = Math.round((endDate - startDate) / msPerDay);
+          const creditPerDay = totalDaysInTerm > 0 ? amount / totalDaysInTerm : 0;
+          
+          const daysRemaining = Math.max(0, Math.round((endDate - calculationStartDate) / msPerDay));
+          
+          const lineCredit = creditPerDay * daysRemaining;
+          grandTotalCredit += lineCredit;
+          creditDisplay.textContent = formatCurrencyDisplay(lineCredit);
+      });
+
+      return grandTotalCredit;
+  }
+
+  function calculateUpgrade(totalCredit) {
     const newLicenseCost = parseCurrencyInput(newLicenseCostInput.value) || 0;
-    let whatTheyOwe = 0;
-    if (newLicenseCost > 0) {
-        whatTheyOwe = Math.max(0, newLicenseCost - totalCredit);
-    }
+    const whatTheyOwe = Math.max(0, newLicenseCost - totalCredit);
     whatTheyOweValue.textContent = formatCurrencyDisplay(whatTheyOwe);
   }
 
+  // --- Data Persistence ---
   function saveInputs() {
-    const inputs = {
+    let multiLineItems = [];
+    document.querySelectorAll('#lineItemsContainer .line-item').forEach(item => {
+        multiLineItems.push({
+            name: item.querySelector('.line-name').value,
+            amount: item.querySelector('.line-amount').value,
+            startDate: item.querySelector('.line-start-date').value,
+            duration: item.querySelector('.line-duration').value,
+            endDate: item.querySelector('.line-end-date').value,
+        });
+    });
+
+    const inputsToSave = {
+      activeView: singleLineToggleBtn.classList.contains('selected') ? 'single' : 'multi',
       amount: amountInput.value,
       purchaseDate: dateInput.value,
-      duration: parseInt(document.querySelector('.toggle-button.selected[data-years]').dataset.years, 10),
+      duration: parseInt(document.querySelector('#singleLineDurationSection .toggle-button.selected[data-years]').dataset.years, 10),
+      multiLineItems: multiLineItems,
       calculationType: calcFromTodayBtn.classList.contains('selected') ? 'today' : 'custom',
       calculationDate: calculationDateInput.value,
-      newLicenseCost: newLicenseCostInput.value // NEW
+      newLicenseCost: newLicenseCostInput.value
     };
-    chrome.storage.local.set({ [STORAGE_KEY_INPUTS]: inputs });
+    chrome.storage.local.set({ [STORAGE_KEY_INPUTS]: inputsToSave });
   }
 
   function loadInputs() {
-    console.log('[DEBUG] 2b. Starting to load calculator inputs from storage...');
     chrome.storage.local.get([STORAGE_KEY_INPUTS], (result) => {
-      console.log('[DEBUG] 3b. Calculator inputs LOADED.');
       const saved = result[STORAGE_KEY_INPUTS] || defaultInputs;
+      
+      // Load single line
       amountInput.value = formatCurrencyDisplay(saved.amount);
       dateInput.value = saved.purchaseDate;
-      
-      calculationDateInput.value = saved.calculationDate || '';
-      setCalculationDateType(saved.calculationType || 'today', false);
-      
-      newLicenseCostInput.value = formatCurrencyDisplay(saved.newLicenseCost); // NEW
-
       durationButtons.forEach(button => {
-        const isSelected = parseInt(button.dataset.years, 10) === saved.duration;
-        button.classList.toggle('selected', isSelected);
+        button.classList.toggle('selected', parseInt(button.dataset.years, 10) === saved.duration);
       });
       
-      validateRequiredFields(); // MOVED: Validate AFTER inputs are loaded
-      calculateAndDisplay();
+      // Load multi-line
+      lineItemsContainer.innerHTML = ''; // Clear existing
+      if (saved.multiLineItems && saved.multiLineItems.length > 0) {
+          saved.multiLineItems.forEach(itemData => addNewLine(itemData));
+      } else {
+          addNewLine(); // Add one empty line if none are saved
+      }
+
+      // Load global
+      calculationDateInput.value = saved.calculationDate || '';
+      setCalculationDateType(saved.calculationType || 'today', false);
+      newLicenseCostInput.value = formatCurrencyDisplay(saved.newLicenseCost);
+
+      // Set view and calculate
+      setView(saved.activeView || 'single', false);
     });
   }
 
   function clearAll() {
+    // Clear single line
     amountInput.value = '';
     dateInput.value = '';
-    calculationDateInput.value = '';
-    newLicenseCostInput.value = ''; // NEW
     durationButtons.forEach(button => button.classList.toggle('selected', button.dataset.years === '1'));
     
+    // Clear multi-line
+    lineItemsContainer.innerHTML = '';
+    addNewLine(); // Add back one fresh line
+
+    // Clear global
     setCalculationDateType('today');
-    validateRequiredFields(); // Re-apply red border after clearing
+    newLicenseCostInput.value = '';
+
+    calculateAndDisplay();
+    saveInputs();
   }
 
-  function copyCreditAmount() {
-    const formattedAmount = totalCreditValue.textContent;
-    if (!formattedAmount || formattedAmount === '$0.00') return;
-
-    const rawNumber = parseCurrencyInput(formattedAmount);
-    const plainTextAmount = String(rawNumber);
-
-    navigator.clipboard.writeText(plainTextAmount).then(() => {
-        const originalText = copyCreditBtn.innerHTML;
-        copyCreditBtn.innerHTML = '✅';
-        copyCreditBtn.title = 'Copied!';
-        setTimeout(() => {
-          copyCreditBtn.innerHTML = originalText;
-          copyCreditBtn.title = 'Copy Amount';
-        }, 1500);
-      }).catch(err => {
-        console.error('Could not copy text: ', err);
-      });
-  }
-  
-  // NEW: Function to copy the "What They Owe" amount
-  function copyOwedAmount() {
-    const formattedAmount = whatTheyOweValue.textContent;
-    if (!formattedAmount || formattedAmount === '$0.00') return;
-
-    const rawNumber = parseCurrencyInput(formattedAmount);
-    const plainTextAmount = String(rawNumber);
-
-    navigator.clipboard.writeText(plainTextAmount).then(() => {
-        const originalText = copyOwedBtn.innerHTML;
-        copyOwedBtn.innerHTML = '✅';
-        copyOwedBtn.title = 'Copied!';
-        setTimeout(() => {
-          copyOwedBtn.innerHTML = originalText;
-          copyOwedBtn.title = 'Copy Amount';
-        }, 1500);
-      }).catch(err => {
-        console.error('Could not copy text: ', err);
-      });
+  // --- Helper/Utility Functions ---
+  function setCalculationDateType(type, shouldSaveAndCalc = true) {
+    const isToday = type === 'today';
+    calcFromTodayBtn.classList.toggle('selected', isToday);
+    calcFromCustomBtn.classList.toggle('selected', !isToday);
+    todaysDateDisplay.classList.toggle('hidden', !isToday);
+    customDateGroup.classList.toggle('hidden', isToday);
+    if (shouldSaveAndCalc) {
+      calculateAndDisplay();
+      saveInputs();
+    }
   }
 
-  /**
-   * Initializes all collapsible cards on the page.
-   */
+  function copyToClipboard(element, button) {
+      const formattedAmount = element.textContent;
+      if (!formattedAmount || formattedAmount === '$0.00') return;
+
+      const rawNumber = parseCurrencyInput(formattedAmount);
+      const plainTextAmount = String(rawNumber);
+
+      navigator.clipboard.writeText(plainTextAmount).then(() => {
+          const originalText = button.innerHTML;
+          button.innerHTML = '✅';
+          button.title = 'Copied!';
+          setTimeout(() => {
+            button.innerHTML = originalText;
+            button.title = 'Copy Amount';
+          }, 1500);
+        }).catch(err => {
+          console.error('Could not copy text: ', err);
+        });
+  }
+
   function initializeCollapsibleCards() {
     chrome.storage.local.get([STORAGE_KEY_CARD_STATES], (result) => {
         const cardStates = result[STORAGE_KEY_CARD_STATES] || {};
-        
         document.querySelectorAll('.card').forEach(card => {
             const cardId = card.id;
             if (!cardId) return;
-
             const toggle = card.querySelector('.collapse-toggle');
             if (!toggle) return;
-
-            // Set initial state from storage
-            if (cardStates[cardId] === true) { // if true, it's collapsed
+            if (cardStates[cardId] === true) {
                 card.classList.add('collapsed');
             }
-
-            // Add click listener
             toggle.addEventListener('click', () => {
                 const isCollapsed = card.classList.toggle('collapsed');
                 cardStates[cardId] = isCollapsed;
@@ -345,36 +436,35 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- Event Listeners ---
-  [amountInput, dateInput, calculationDateInput, newLicenseCostInput].forEach(input => input.addEventListener('input', () => {
-    validateRequiredFields(); // Validate on every input change
-    calculateAndDisplay();
-    saveInputs();
-  }));
+  singleLineToggleBtn.addEventListener('click', () => setView('single'));
+  multiLineToggleBtn.addEventListener('click', () => setView('multi'));
+  addLineBtn.addEventListener('click', () => { addNewLine(); calculateAndDisplay(); });
   
-  [amountInput, newLicenseCostInput].forEach(input => {
-    input.addEventListener('blur', () => { 
-      input.value = formatCurrencyDisplay(input.value); 
-      saveInputs(); 
-    });
-  });
-  
+  // Single Line Inputs
+  [amountInput, dateInput].forEach(input => input.addEventListener('input', () => { calculateAndDisplay(); saveInputs(); }));
+  amountInput.addEventListener('blur', () => { amountInput.value = formatCurrencyDisplay(amountInput.value); });
   durationButtons.forEach(button => button.addEventListener('click', (event) => {
     durationButtons.forEach(btn => btn.classList.remove('selected'));
     event.target.classList.add('selected');
     calculateAndDisplay();
     saveInputs();
   }));
+  
+  // Global Inputs
+  calcFromTodayBtn.addEventListener('click', () => setCalculationDateType('today'));
+  calcFromCustomBtn.addEventListener('click', () => setCalculationDateType('custom'));
+  calculationDateInput.addEventListener('input', () => { calculateAndDisplay(); saveInputs(); });
+  newLicenseCostInput.addEventListener('input', () => { calculateAndDisplay(); saveInputs(); });
+  newLicenseCostInput.addEventListener('blur', () => { newLicenseCostInput.value = formatCurrencyDisplay(newLicenseCostInput.value); });
 
-  if (calcFromTodayBtn) calcFromTodayBtn.addEventListener('click', () => setCalculationDateType('today'));
-  if (calcFromCustomBtn) calcFromCustomBtn.addEventListener('click', () => setCalculationDateType('custom'));
-
-  if (clearAllBtn) clearAllBtn.addEventListener('click', clearAll);
-  if (copyCreditBtn) copyCreditBtn.addEventListener('click', copyCreditAmount);
-  if (copyOwedBtn) copyOwedBtn.addEventListener('click', copyOwedAmount); // NEW
+  // Buttons
+  clearAllBtn.addEventListener('click', clearAll);
+  copyCreditBtn.addEventListener('click', () => copyToClipboard(totalCreditValue, copyCreditBtn));
+  copyOwedBtn.addEventListener('click', () => copyToClipboard(whatTheyOweValue, copyOwedBtn));
 
   // --- Initial Setup ---
   todaysDateValue.textContent = new Date().toLocaleDateString();
   loadGlobalSettings();
-  loadInputs(); // This function now handles the initial validation
-  initializeCollapsibleCards(); // Initialize collapsible sections
+  loadInputs();
+  initializeCollapsibleCards();
 });

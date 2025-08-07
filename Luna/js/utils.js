@@ -105,3 +105,22 @@ export function generateTimestamp(forFilename = true) {
     return now.toLocaleString();
   }
 }
+
+/**
+ * Converts a hex color string to an RGBA string.
+ * @param {string} hex - The hex color code (e.g., "#RRGGBB").
+ * @param {number} alpha - The alpha transparency (0.0 to 1.0).
+ * @returns {string} The RGBA color string.
+ */
+export function hexToRgba(hex, alpha) {
+    // If hex is invalid, return a default color
+    if (!hex || !/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+        return `rgba(59, 130, 246, ${alpha})`; 
+    }
+    let c = hex.substring(1).split('');
+    if (c.length === 3) {
+        c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+    }
+    c = '0x' + c.join('');
+    return `rgba(${(c >> 16) & 255}, ${(c >> 8) & 255}, ${c & 255}, ${alpha})`;
+}

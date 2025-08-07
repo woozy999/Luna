@@ -7,7 +7,7 @@
 </head>
 <body>
 
-  <div class="main-menu-header">
+  <div class="calculator-header">
     <div class="header-left">
       <img class="extensionIcon" src="../icons/logo.png" alt="Luna Icon">
       <h1 id="extensionTitle">Luna</h1>
@@ -20,13 +20,20 @@
       <button id="toolsToggleBtn" class="toggle-button selected" data-view="tools">Tools</button>
       <button id="logsToggleBtn" class="toggle-button" data-view="logs">Logs</button>
     </div>
+
+    <!-- The 'menu-options' divs now act as containers for the nav list -->
     <div id="toolsSection" class="menu-options">
-      <a href="../html/quoteCalculator.html" class="menu-button">Channel Quote Calculator</a>
-      <a href="../html/creditCalculator.html" class="menu-button">Credit Calculator</a>
-      <a href="../html/needFormater.html" class="menu-button">Need Formatter</a>
+      <nav class="main-menu-nav">
+        <a href="../html/quoteCalculator.html" class="nav-item">Channel Quote Calculator</a>
+        <a href="../html/creditCalculator.html" class="nav-item">Credit Calculator</a>
+        <a href="../html/needFormater.html" class="nav-item">Need Formatter</a>
+      </nav>
     </div>
+
     <div id="logsSection" class="menu-options hidden">
-      <a href="../html/quoteRecordLog.html" class="menu-button">Channel Quote Log</a>
+      <nav class="main-menu-nav">
+        <a href="../html/quoteRecordLog.html" class="nav-item">Channel Quote Log</a>
+      </nav>
     </div>
   </div>
 

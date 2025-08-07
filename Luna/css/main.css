@@ -1,132 +1,102 @@
-/* --- GLOBAL STYLES & THEME VARIABLES --- */
-
 :root {
-  /* Dynamic colors that will be set by JavaScript */
-  --accent-color: #51a3f9;
-  --text-highlight-color: #ed5653;
+  /* New Color Palette based on Reference Image */
+  --primary-bg: #F8FAFC; /* Very light gray, almost white */
+  --secondary-bg: #FFFFFF; /* White for cards */
+  --border-color: #E2E8F0;
+  --primary-accent: #3B82F6; /* A nice, modern blue */
+  --primary-accent-shadow: rgba(59, 130, 246, 0.2);
   
-  /* Structural variables */
-  --highlight-blue: #6a95e0; /* A soft blue for focus/borders, if needed */
+  --text-primary: #1F2937; /* Dark gray for primary text */
+  --text-secondary: #6B7280; /* Lighter gray for labels and secondary text */
+  --text-highlight-color: var(--primary-accent); /* Use accent for highlights */
+
+  /* Structural Variables */
+  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+  --card-radius: 12px;
   --footer-height: 55px;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 
-  /* Fixed button colors */
-  --clear-button-bg: #e74c3c; /* Red */
-  --clear-button-hover: #c0392b;
-  --clear-button-active: #a82b1d;
-  --complete-button-bg: #4CAF50; /* Traditional Green */
-  --complete-button-hover: #45A049;
-  --complete-button-active: #398E3D;
-  --complete-button-text: #f0f0f0;
-  --download-all-button-bg: #3498db; /* Blue, matching highlights */
-  --download-all-button-hover: #2980b9;
-  --download-all-button-active: #2172a5;
-
-  /* Icon colors for record log */
-  --record-icon-color: #6a95e0;
-  --record-icon-hover: #a0c4ff;
-  --delete-icon-color: #e74c3c;
-  --delete-icon-hover: #ff776e;
+  /* Button Colors */
+  --clear-button-bg: #FEE2E2;
+  --clear-button-text: #DC2626;
+  --clear-button-hover-bg: #FECACA;
   
-  /* New: Advanced Mode Highlight */
-  --advanced-highlight-border: 1px dashed #f39c12; /* Gold/orange */
-  --advanced-highlight-text: #f39c12;
+  --complete-button-bg: var(--primary-accent);
+  --complete-button-text: #FFFFFF;
+
+  /* Advanced Mode Colors */
+  --advanced-border-color: #F97316; /* Orange-500 */
+  --advanced-glow-color: rgba(249, 115, 22, 0.4);
 }
 
-/* New Dark Theme */
+/* These themes are kept for logic but the UI will default to the new light style */
+/* The core design is now light, with theme settings adjusting the accent color */
 body.theme-dark {
-  --dark-bg: #1e1e1e;
-  --dark-secondary-bg: #2b2b2b;
-  --dark-border: #444;
-  --text-light: #f0f0f0;
-  --text-medium: #ccc;
-  --display-box-bg: #3a3a3a;
-  --display-box-border: 1px solid #555;
-  --card-bg: #2b2b2b;
-  --card-border: 1px solid #444;
-  --card-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  --slider-track-color: #555;
+  --primary-bg: #111827;
+  --secondary-bg: #1F2937;
+  --border-color: #374151;
+  --text-primary: #F9FAFB;
+  --text-secondary: #9CA3AF;
+  --clear-button-bg: #372323;
+  --clear-button-text: #F87171;
+  --clear-button-hover-bg: #4e2e2e;
 }
-
-/* New Light Theme (replaces old theme-white) */
 body.theme-light {
-  --dark-bg: #f0f0f0;
-  --dark-secondary-bg: #e0e0e0;
-  --dark-border: #bbb;
-  --text-light: #1e1e1e;
-  --text-medium: #555;
-  --display-box-bg: #ffffff;
-  --display-box-border: 1px solid #ccc;
-  --card-bg: #ffffff;
-  --card-border: 1px solid #ccc;
-  --card-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  --slider-track-color: #ccc;
+  --primary-bg: #F8FAFC;
+  --secondary-bg: #FFFFFF;
+  --border-color: #E2E8F0;
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --clear-button-bg: #FEE2E2;
+  --clear-button-text: #DC2626;
+  --clear-button-hover-bg: #FECACA;
 }
 
 
 /* --- BASE HTML ELEMENT STYLES --- */
 html {
-    height: 100%; /* Ensure html takes full viewport height */
+    box-sizing: border-box;
 }
 
 body {
-  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Set Monaco as preferred font */
+  font-family: var(--font-sans);
   margin: 0;
-  /* Overall padding for the body, ensures content isn't flush with panel edges */
   padding: 15px;
-  background-color: var(--dark-bg);
-  color: var(--text-light);
+  background-color: var(--primary-bg);
+  color: var(--text-primary);
   box-sizing: border-box;
-  height: 100%; /* Ensure body fills html height */
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  /* CRITICAL: Allow body to scroll vertically if its content exceeds viewport, but no horizontal scroll */
-  overflow-y: auto; /* Allows the entire panel to scroll if content is too tall */
-  overflow-x: hidden; /* Prevents horizontal scrolling universally */
+  overflow-x: hidden;
 }
 
 .page-container {
   display: flex;
   flex-direction: column;
-  flex: 1; /* Allows page content to grow and fill available vertical space */
-  width: 100%; /* Ensure it takes full width within body padding */
-  max-width: 350px; /* Constrain max width for better appearance if panel is wide */
-  margin: 0 auto; /* Center the page container horizontally */
-  
-  /* CRITICAL CORRECTION: Remove overflow property here.
-     The .page-container should expand and its content contribute to the body's scroll. */
-  /* NO overflow property on .page-container to allow content to push body scroll */
-  
-  /* Standard bottom padding for content, adjust based on fixed footers */
-  padding-bottom: 15px;
+  flex: 1;
+  width: 100%;
+  max-width: 380px; /* Slightly wider for better spacing */
+  margin: 0 auto;
+  padding-bottom: calc(15px + var(--footer-height));
+  min-height: 0; /* Prevents flexbox overflow issues */
 }
-
-/* Specific adjustment for pages with fixed footers to push content up */
-#quoteCalculatorPage,
-#recordLogPage,
-#creditCalculatorPage,
-#needFormatterPage,
-#mainMenuPage { /* MODIFIED: Added mainMenuPage to this rule */
-    padding-bottom: calc(15px + var(--footer-height)); 
-}
-
 
 /* --- UTILITY CLASSES --- */
 .hidden {
   display: none !important;
 }
 
-/* --- CARD STYLE (New Base for many elements) --- */
+/* --- CARD STYLE --- */
 .card {
-  background-color: var(--card-bg);
-  border: var(--card-border);
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 15px;
-  box-shadow: var(--card-box-shadow);
+  background-color: var(--secondary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--card-radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--card-shadow);
   box-sizing: border-box;
   width: 100%;
-  min-width: 0;
-  position: relative;
   transition: all 0.3s ease;
 }
 
@@ -134,16 +104,20 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px; /* Space between header and content */
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .card.collapsed .card-header {
   margin-bottom: 0;
+  border-bottom: 1px solid transparent;
 }
 
 .card-header-title {
-  font-weight: bold;
-  color: var(--text-medium);
+  font-weight: 600; /* Semibold */
+  font-size: 1em;
+  color: var(--text-primary);
 }
 
 .card-header-actions {
@@ -155,15 +129,7 @@ body {
 .card-content {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  transform-origin: top;
-}
-
-/* Collapsed state for cards */
-.card.collapsed {
-  padding-top: 15px;
-  padding-bottom: 15px;
+  gap: 20px; /* Increased gap for better spacing */
 }
 
 .card.collapsed .card-content {
@@ -173,7 +139,7 @@ body {
 .collapse-toggle {
   background: none;
   border: none;
-  color: var(--text-medium);
+  color: var(--text-secondary);
   font-size: 1.1em;
   cursor: pointer;
   padding: 4px;
@@ -181,557 +147,292 @@ body {
   line-height: 1;
 }
 .collapse-toggle:hover {
-  color: var(--text-light);
+  color: var(--text-primary);
 }
 .card.collapsed .collapse-toggle {
   transform: rotate(-90deg);
 }
 
 /* --- HEADER & BACK BUTTONS --- */
-.main-menu-header,
-.calculator-header { /* Applied to all headers now for consistency */
+.calculator-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--dark-border);
-  box-sizing: border-box; /* Ensure padding/border is included in width */
-  flex-shrink: 0; /* Prevent header from shrinking when space is limited */
-  min-width: 0; /* Allow flex items to shrink below content size */
+  margin-bottom: 24px;
+  padding-bottom: 0;
+  border-bottom: none; /* Removed border for a cleaner look */
+  box-sizing: border-box;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  min-width: 0; /* Allow shrinking to prevent overflow, but prefer not to */
 }
 
 .extensionIcon {
   width: 32px;
   height: 32px;
-  margin-right: 8px;
-  flex-shrink: 0; /* Prevent icon from shrinking */
+  margin-right: 12px;
 }
 
-/* ADDED: CSS class for inverted icon in dark mode */
 .extensionIcon.inverted {
-    filter: brightness(0) invert(1); /* MODIFIED: Changes dark color to pure white */
+    filter: brightness(0) invert(1);
 }
 
-/* Styles for header titles (Luna / Quote Calculator / Settings / Record Log) */
-#extensionTitle,
-.calculator-header h1 {
-  font-size: 1.8em;
-  color: #51a3f9; /* Set to your fixed blue hex code */
+#extensionTitle {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: var(--text-primary);
   margin: 0;
   line-height: 1;
-  flex-grow: 1; /* Allow title to take available space */
-  text-align: left;
-  /* Removed transition: opacity 0.3s ease; to prevent fade effect */
-  padding-right: 10px;
-  white-space: nowrap; /* Prevent title from wrapping */
-  overflow: hidden; /* Hide overflow content */
-  text-overflow: ellipsis; /* Add ellipsis for clipped text */
-  min-width: 0; /* Allow text to shrink and ellipsis to apply */
 }
 
-/* Specific class for hiding Luna title */
 #extensionTitle.hidden-title {
-    opacity: 0; /* Changed to opacity to avoid layout shifts, but can be display: none */
-    pointer-events: none; /* Prevent interaction when hidden */
+    display: none;
 }
 
-/* --- Links acting as buttons (removed underlines) --- */
-.icon-button,
-.menu-button,
-.back-button,
-.footer-button {  /* MODIFIED: added .footer-button */
-  text-decoration: none; /* REMOVE UNDERLINE */
+/* --- Links acting as buttons --- */
+.icon-button, .back-button, .footer-button {
+  text-decoration: none;
 }
 
-
-.icon-button {
-  background: none;
-  border: none;
-  font-size: 1.8em; /* Slightly larger for menu icons */
-  color: var(--text-medium);
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 5px;
-  transition: color 0.2s ease, background-color 0.2s ease;
-  line-height: 1;
-  flex-shrink: 0; /* Prevent icon button from shrinking */
-}
-
-.icon-button:hover {
-  color: var(--text-light);
-  background-color: var(--dark-secondary-bg);
-}
-
-.back-button { /* Applied to all back buttons */
-  background: none;
-  border: none;
-  color: var(--text-medium);
+.icon-button, .back-button {
+  background: var(--secondary-bg);
+  border: 1px solid var(--border-color);
   font-size: 1.2em;
+  color: var(--text-secondary);
   cursor: pointer;
-  padding: 5px 8px;
-  border-radius: 4px;
-  transition: color 0.2s ease, background-color 0.2s ease;
-  flex-shrink: 0; /* Prevent back button from shrinking */
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.back-button:hover {
-  color: var(--text-light);
-  background-color: var(--dark-secondary-bg);
+.icon-button:hover, .back-button:hover {
+  border-color: #94A3B8;
+  color: var(--text-primary);
 }
 
 
-/* --- MAIN MENU PAGE BUTTONS --- */
+/* --- MAIN MENU PAGE --- */
 .main-menu-toggle-buttons {
   display: flex;
-  gap: 10px;
+  gap: 0;
   justify-content: center;
-  margin-bottom: 20px; /* Space between toggle and content sections */
+  margin-bottom: 20px;
   width: 100%;
-  padding: 0 5px; /* Match input-group padding */
-  box-sizing: border-box;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--primary-bg);
 }
 
 .main-menu-toggle-buttons .toggle-button {
-    flex-grow: 1; /* Allow buttons to expand */
-    max-width: 150px; /* Limit max width for toggle buttons */
-}
-
-
-.menu-options {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  /* Removed max-width here. The .page-container's max-width handles overall width. */
-  width: 100%; /* Ensure they try to take full width */
-  box-sizing: border-box; /* Include padding in width calculations */
-  padding: 0; /* No internal padding here, let buttons handle their own internal spacing */
-}
-
-.menu-button {
-  background-color: var(--accent-color);
-  color: var(--text-light);
-  padding: 15px 20px; /* Increased padding */
-  font-size: 1.2em; /* Slightly larger font */
-  border: none;
-  border-radius: 8px; /* More rounded corners */
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease, filter 0.2s ease;
-  width: 100%; /* Ensure it fills parent's width */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  box-sizing: border-box; /* Important for padding + width */
-  min-width: 0; /* Allow flex item to shrink below its content size */
-  white-space: normal; /* Allow button text to wrap */
-  text-align: center; /* Center text for better appearance when wrapped */
-}
-
-.menu-button:hover {
-  filter: brightness(1.1);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Increased shadow on hover */
-}
-
-.menu-button:active {
-  filter: brightness(0.9);
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Reset Button specific styles */
-.menu-button.reset-button {
-    background-color: var(--clear-button-bg);
-    margin-top: 30px; /* Space it from other settings */
-    font-size: 1em;
+    flex-grow: 1;
+    border: none;
+    border-radius: 0;
+    color: var(--text-secondary);
+    background-color: transparent;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
     padding: 10px 15px;
 }
-.menu-button.reset-button:hover {
-    background-color: var(--clear-button-hover);
-}
-.menu-button.reset-button:active {
-    background-color: var(--clear-button-active);
+
+.main-menu-toggle-buttons .toggle-button.selected {
+    color: var(--primary-accent);
+    background-color: var(--secondary-bg);
+    border-bottom-color: var(--primary-accent);
+    font-weight: 600;
 }
 
-/* --- QUOTE CALCULATOR FIELD STYLES --- */
+.menu-options {
+  width: 100%;
+}
 
+.main-menu-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nav-item {
+    display: block;
+    padding: 12px 16px;
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+    border-color: var(--primary-accent);
+    color: var(--primary-accent);
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow);
+}
+
+
+/* --- INPUTS AND FORMS --- */
 .input-group {
   display: flex;
   flex-direction: column;
   width: 100%;
   box-sizing: border-box;
-  padding: 0 5px;
 }
 
 .input-group label {
   font-size: 0.9em;
+  font-weight: 500;
   margin-bottom: 8px;
-  color: var(--text-medium);
+  color: var(--text-secondary);
 }
 
 .input-group input[type="text"],
 .input-group input[type="number"],
-.input-group textarea {
-  background-color: var(--dark-secondary-bg);
-  border: 1px solid var(--dark-border);
-  color: var(--text-light);
-  padding: 8px;
-  border-radius: 4px;
+.input-group textarea,
+.line-item input[type="text"],
+.line-item select {
+  background-color: var(--primary-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 10px 12px;
+  border-radius: 8px;
   font-size: 1em;
-  width: 100%; /* Make input fields fill 100% of their parent .input-group */
-  box-sizing: border-box; /* Ensure padding is included in width */
-  resize: vertical; /* Allow vertical resizing for textarea */
-  min-width: 0; /* Allow input to shrink to fit container */
-  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: var(--font-sans);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .input-group input[type="text"]:focus,
 .input-group input[type="number"]:focus,
-.input-group textarea:focus {
+.input-group textarea:focus,
+.line-item input[type="text"]:focus,
+.line-item select:focus {
   outline: none;
-  border-color: var(--highlight-blue);
-  box-shadow: 0 0 0 2px rgba(106, 149, 224, 0.3);
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 0 3px var(--primary-accent-shadow);
 }
 
-/* Style for required fields that are currently empty/invalid */
-.input-group input.input-error {
-  border-color: var(--clear-button-bg) !important;
+.input-group input.input-error,
+.line-item input.input-error {
+  border-color: #EF4444 !important;
 }
 
-.input-group input.input-error:focus {
-  border-color: var(--clear-button-bg) !important;
-  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.4) !important; /* Red glow on focus */
-}
-
-/* Common styles for button sections (Integrations, Discount/Increase) */
-.integrations-section,
-.discount-increase-section {
+.integrations-section {
   width: 100%;
   box-sizing: border-box;
-  padding: 0 5px; /* Add horizontal padding */
 }
 
-.integrations-section label,
-.discount-increase-section label {
+.integrations-section label {
   display: block;
   font-size: 0.9em;
+  font-weight: 500;
   margin-bottom: 8px;
-  color: var(--text-medium);
-  text-align: center;
-  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
+  color: var(--text-secondary);
+  text-align: left;
 }
 
-.integration-buttons,
-.discount-increase-buttons,
 .toggle-buttons {
   display: flex;
   gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap; /* Allow buttons to wrap to next line if width is constrained */
-  min-width: 0; /* Allow flex container to shrink */
+  justify-content: flex-start;
+  flex-wrap: wrap;
 }
 
-.integration-button,
 .toggle-button {
-  background-color: var(--dark-secondary-bg);
-  color: var(--text-medium);
+  background-color: var(--secondary-bg);
+  color: var(--text-secondary);
   padding: 8px 15px;
-  font-size: 0.95em;
-  border: 1px solid var(--dark-border);
-  border-radius: 5px;
+  font-size: 0.9em;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-  flex-grow: 1; /* Allow buttons to share space */
-  max-width: 100px; /* Limit max width to prevent overly wide buttons */
-  box-sizing: border-box;
-  text-align: center; /* Ensure text is centered within button */
-  min-width: 0; /* Allow flex item to shrink below its content size */
-  white-space: normal; /* ALLOW button text to wrap */
-  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
+  transition: all 0.2s ease;
+  flex-grow: 1;
 }
 
-.integration-button:hover,
 .toggle-button:hover {
-  background-color: #3a3a3a;
-  color: var(--text-light);
-  border-color: #666;
+  border-color: var(--primary-accent);
+  color: var(--primary-accent);
 }
 
-.integration-button.selected,
 .toggle-button.selected {
-  background-color: var(--accent-color);
-  color: var(--text-light);
-  border-color: transparent;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background-color: var(--primary-accent);
+  color: #FFFFFF;
+  border-color: var(--primary-accent);
+  transition: filter 0.2s ease;
 }
 
-/* Conditional fields containers */
-.conditional-fields {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* NEW/CORRECTED RULE: Add spacing between items inside conditional-fields */
-.conditional-fields > *:not(:last-child) {
-    margin-bottom: 15px;
+.toggle-button.selected:hover {
+  filter: brightness(90%);
 }
 
 
-/* Style for the container holding the date options */
-#calculationDateContainer {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-/* Styles for display-only boxes (calculated values) */
+/* --- DISPLAY BOXES --- */
 .display-group {
   display: flex;
   flex-direction: column;
   width: 100%;
-  box-sizing: border-box;
-  padding: 0 5px; /* Add horizontal padding to display groups */
 }
 
 .display-group label {
   font-size: 0.9em;
+  font-weight: 500;
   margin-bottom: 8px;
-  color: var(--text-medium);
-  font-family: Monaco, Consolas, "Lucida Console", monospace;
+  color: var(--text-secondary);
 }
 
-.display-box {
-  background-color: var(--display-box-bg);
-  border: var(--display-box-border);
-  color: var(--text-highlight-color); /* Highlighted color for output */
-  padding: 8px;
-  border-radius: 4px;
+.display-box, .display-box-with-button {
+  background-color: var(--primary-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 10px 12px;
+  border-radius: 8px;
   font-size: 1em;
-  width: 100%; /* Make display boxes fill 100% of their parent */
+  width: 100%;
   text-align: left;
-  overflow: hidden; /* This will be overridden for formattedOutput specifically */
-  text-overflow: ellipsis; /* This will be overridden for formattedOutput specifically */
-  white-space: nowrap; /* This will be overridden for formattedOutput specifically */
   box-sizing: border-box;
-  font-weight: bold;
-  min-width: 0; /* Allow to shrink */
-  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
+  font-weight: 600;
 }
 
-/* ADDED: Specific styles for the formattedOutput box to allow expansion */
 #formattedOutput {
-  white-space: pre-wrap; /* Allows text to wrap and preserves line breaks */
-  overflow: auto; /* Allows scrolling if content exceeds height, but prefers to expand */
-  text-overflow: clip; /* Prevent ellipsis, show all content */
-  min-height: 80px; /* Give it a reasonable starting height */
-  padding: 10px; /* Slightly more padding for text display */
-  font-size: 0.9em; /* Slightly smaller font for more text in box */
-  color: var(--text-light); /* Use general text color for readability */
-  font-weight: normal; /* Normal weight for long text */
-}
-
-.advanced-tag {
-  font-size: 0.8em;
-  color: var(--advanced-highlight-text);
+  white-space: pre-wrap;
+  overflow: auto;
+  min-height: 120px;
+  color: var(--text-secondary);
   font-weight: normal;
-  margin-left: 5px;
 }
 
-.advanced-display .display-box {
-  border: var(--advanced-highlight-border);
+.display-box-with-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4px 0 12px;
 }
 
-.advanced-input input {
-  border: var(--advanced-highlight-border);
+.display-box-with-button span {
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--text-highlight-color);
+    padding: 10px 0;
 }
 
-/* Highlight for the active calculation date source */
-.calculation-date-active .display-box,
-.calculation-date-active input {
-  border: 1px dashed var(--highlight-blue);
-  box-shadow: 0 0 4px var(--highlight-blue);
-}
-
-
-/* --- SETTINGS PAGE STYLES --- */
-
-.settings-group {
-  margin-top: 0; /* Removed top margin as card provides spacing */
-  margin-bottom: 15px; /* Use card spacing */
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0 5px; /* Add horizontal padding to settings groups */
-}
-
-.settings-group:first-child {
-    margin-top: 15px; /* Add back some top margin for the first card */
-}
-
-/* Specific padding for settings cards (bottom padding added here) */
-.settings-group.card {
-  padding-bottom: 15px; /* Added bottom padding to the card itself */
+#totalCreditValue, #whatTheyOweValue {
+  color: #16A34A; /* A nice, modern green */
 }
 
 
-.settings-group label {
-  display: block;
-  font-size: 0.9em;
-  margin-bottom: 10px;
-  color: var(--text-medium);
-  text-align: center;
-  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
-}
-
-/* Styles for the magnification slider and its display */
-.magnification-options {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: center;
-  width: 100%;
-  padding: 0 10px;
-  box-sizing: border-box;
-}
-
-/* Modern Slider Styling */
-#zoomSlider {
-  -webkit-appearance: none; /* REQUIRED to style the slider */
-  appearance: none;
-  width: 90%;
-  height: 8px;
-  border-radius: 4px;
-  outline: none;
-  opacity: 1;
-  transition: background-color 0.2s ease;
-  flex-shrink: 0;
-  margin: 0; /* Ensure no default margin interfering */
-  padding: 0; /* Ensure no default padding interfering */
-  background: transparent; /* Make the base track transparent, style with ::-webkit-slider-runnable-track */
-}
-
-/* Style the slider track */
-#zoomSlider::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 8px;
-  background: var(--slider-track-color);
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-}
-
-#zoomSlider::-moz-range-track {
-  width: 100%;
-  height: 8px;
-  background: var(--slider-track-color);
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-}
-
-/* Style the slider thumb (the draggable part) */
-#zoomSlider::-webkit-slider-thumb {
-  -webkit-appearance: none; /* REQUIRED to style the thumb */
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--accent-color);
-  cursor: grab;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  margin-top: -6px; /* CRITICAL: Vertically center the thumb on the 8px track (20px thumb - 8px track) / 2 = 6px offset */
-  border: 2px solid var(--dark-bg);
-  transition: background-color 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
-}
-
-#zoomSlider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--accent-color);
-  cursor: grab;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  border: 2px solid var(--dark-bg);
-  transition: background-color 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
-}
-
-
-#zoomSlider:hover::-webkit-slider-thumb {
-  filter: brightness(1.1);
-  border-color: var(--dark-secondary-bg);
-}
-
-#zoomSlider:hover::-moz-range-thumb {
-  filter: brightness(1.1);
-  border-color: var(--dark-secondary-bg);
-}
-
-#zoomSlider::-webkit-slider-thumb:active {
-  cursor: grabbing;
-  filter: brightness(0.9);
-}
-#zoomSlider::-moz-range-thumb:active {
-  cursor: grabbing;
-  filter: brightness(0.9);
-}
-
-
-#zoomValueDisplay {
-  font-size: 1.1em;
-  color: var(--text-light);
-  font-weight: bold;
-  min-width: 60px;
-  text-align: center;
-  flex-shrink: 0;
-  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
-}
-
-/* Theme Selector Styles */
-.theme-options {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.color-picker-group {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-
-.color-picker-group label {
-  margin-bottom: 0; /* Override default margin */
-  text-align: left;
-  flex-grow: 1;
-}
-
-input[type="color"] {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  width: 40px;
-  height: 40px;
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  border-radius: 50%;
-  overflow: hidden;
-}
-input[type="color"]::-webkit-color-swatch {
-  border-radius: 50%;
-  border: 1px solid var(--dark-border);
-}
-input[type="color"]::-moz-color-swatch {
-  border-radius: 50%;
-  border: 1px solid var(--dark-border);
-}
-
-
-/* --- FOOTER BAR STYLES --- */
+/* --- FOOTER BAR --- */
 .calculator-footer-bar,
 .record-log-footer-bar {
   position: fixed;
@@ -739,203 +440,366 @@ input[type="color"]::-moz-color-swatch {
   left: 0;
   right: 0;
   height: var(--footer-height);
-  background-color: var(--dark-secondary-bg);
-  border-top: 1px solid var(--dark-border);
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-top: 1px solid var(--border-color);
   display: flex;
-  justify-content: space-around; /* Distribute space for multiple buttons */
+  justify-content: space-around;
   align-items: center;
   padding: 0 15px;
-  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
   z-index: 100;
-  flex-shrink: 0; /* Prevent footer from shrinking */
-  box-sizing: border-box; /* Important for padding + width */
+  box-sizing: border-box;
+  gap: 10px;
 }
 
-.record-log-footer-bar {
-  justify-content: center; /* Center the single button in record log */
+body.theme-dark .calculator-footer-bar,
+body.theme-dark .record-log-footer-bar {
+    background-color: rgba(17, 24, 39, 0.8);
 }
+
 
 .footer-button {
   color: var(--text-light);
   padding: 10px 15px;
   font-size: 0.9em;
+  font-weight: 600;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  flex-grow: 1; /* Allows buttons to grow and fill space */
-  margin: 0 5px; /* Space between buttons */
+  transition: all 0.2s ease;
+  flex-grow: 1;
   text-align: center;
-  box-sizing: border-box; /* Include padding in width */
-  white-space: normal; /* ALLOW button text to wrap */
-  min-width: 0; /* Allow buttons to shrink */
-  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
-}
-
-/* Remove margin for first/last buttons in calculator footer to fit full width */
-.calculator-footer-bar .footer-button:first-child {
-    margin-left: 0;
-}
-
-.calculator-footer-bar .footer-button:last-child {
-    margin-right: 0;
 }
 
 .footer-button:hover {
   transform: translateY(-1px);
 }
 
-.footer-button:active {
-  transform: translateY(0);
-}
-
-/* Specific colors for footer buttons */
 .footer-button.clear-button {
   background-color: var(--clear-button-bg);
+  color: var(--clear-button-text);
 }
 .footer-button.clear-button:hover {
-  background-color: var(--clear-button-hover);
-}
-.footer-button.clear-button:active {
-  background-color: var(--clear-button-active);
+  background-color: var(--clear-button-hover-bg);
 }
 
-.footer-button.complete-button {
-  background-color: var(--complete-button-bg);
-  color: var(--complete-button-text);
-}
-.footer-button.complete-button:hover {
-  background-color: var(--complete-button-hover);
-}
-.footer-button.complete-button:active {
-  background-color: var(--complete-button-active);
-}
-
-/* NEW/MODIFIED STYLES FOR FEEDBACK BUTTON */
+.footer-button.complete-button,
+.footer-button.download-all-button,
 .footer-button.feedback-button {
   background-color: var(--complete-button-bg);
   color: var(--complete-button-text);
 }
-
-.footer-button.feedback-button:hover,
-.footer-button.feedback-button:active {
-  background-color: var(--complete-button-bg); /* Keep the color static */
-  transform: none; /* Disable hover/active transform effects */
+.footer-button.complete-button:hover,
+.footer-button.download-all-button:hover,
+.footer-button.feedback-button:hover {
+  filter: brightness(90%);
 }
 
-
-.footer-button.download-all-button {
-  background-color: var(--download-all-button-bg);
-  color: var(--text-light);
-}
-.footer-button.download-all-button:hover {
-  background-color: var(--download-all-button-hover);
-}
-.footer-button.download-all-button:active {
-  background-color: var(--download-all-button-active);
-}
-
-/* --- RECORD LOG PAGE STYLES --- */
-
+/* --- RECORD LOG PAGE --- */
 .record-log-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 15px;
 }
 
 .record-item {
-  /* Inherits card styles */
-  background-color: var(--card-bg);
-  border: var(--card-border);
-  border-radius: 8px;
-  padding: 10px 15px; /* Slightly less padding than a full card */
+  background-color: var(--secondary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--card-radius);
+  padding: 10px 15px;
   display: flex;
   flex-direction: column;
   gap: 5px;
-  font-size: 0.9em;
-  box-shadow: var(--card-box-shadow); /* Apply card shadow */
-  box-sizing: border-box; /* Important for width calculations */
-  width: 100%; /* Ensure it fills parent */
-  min-width: 0; /* Allow to shrink */
 }
 
 .record-item-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px dashed var(--dark-border);
-  padding-bottom: 5px;
-  margin-bottom: 5px;
-  flex-wrap: wrap; /* Allow header content to wrap if necessary */
-  min-width: 0; /* Allow flex container to shrink */
+  flex-wrap: wrap;
 }
 
 .record-timestamp {
-  font-weight: bold;
-  color: var(--text-light);
-  font-size: 1em;
-  flex-grow: 1; /* Allow timestamp to grow */
-  white-space: nowrap; /* Prevent timestamp from wrapping */
-  overflow: hidden; /* Hide overflow */
-  text-overflow: ellipsis; /* Add ellipsis */
-  min-width: 0; /* Allow text to shrink */
-  font-family: Monaco, Consolas, "Lucida Console", monospace; /* Apply font */
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 0.9em;
 }
 
 .record-actions {
   display: flex;
   gap: 8px;
-  flex-shrink: 0; /* Prevent actions from shrinking */
-  min-width: 0; /* Allow flex container to shrink */
 }
 
 .record-action-button {
   background: none;
   border: none;
   font-size: 1.2em;
-  color: var(--record-icon-color);
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 3px;
-  transition: color 0.2s ease, transform 0.1s ease;
-  flex-shrink: 0; /* Prevent buttons from shrinking */
+  transition: all 0.2s ease;
 }
-
 .record-action-button:hover {
-  color: var(--record-icon-hover);
+  color: var(--primary-accent);
   transform: scale(1.1);
-}
-.record-action-button:active {
-  transform: scale(0.95);
 }
 
 .record-item-details {
-  white-space: pre-wrap; /* Preserve whitespace and line breaks */
-  word-wrap: break-word; /* Allow long words to break */
-  font-family: 'Consolas', 'Courier New', monospace; /* Monospace for data display */
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
   font-size: 0.85em;
-  color: var(--text-medium);
-  max-height: 150px; /* Limit height of individual record details */
-  overflow-y: auto; /* Enable scrolling for long records */
-  padding-right: 5px; /* Padding for scrollbar */
-  box-sizing: border-box; /* Include padding in width */
-  min-width: 0; /* Allow to shrink */
+  color: var(--text-secondary);
+  padding-top: 10px;
+  margin-top: 5px;
+  border-top: 1px dashed var(--border-color);
 }
 
-/* Style for empty log message */
 .empty-log-message {
   text-align: center;
-  color: var(--text-medium);
+  color: var(--text-secondary);
   margin-top: 30px;
-  font-family: Monaco, Consolas, "Lucida Console", monospace;
+  padding: 20px;
+  background-color: var(--secondary-bg);
+  border-radius: var(--card-radius);
 }
 
-/* --- NEW STYLES for HELP ICON and COPY BUTTON --- */
+/* --- ADVANCED MODE STYLES --- */
+body.advanced-mode-on .advanced-input input,
+body.advanced-mode-on .advanced-display .display-box,
+body.advanced-mode-on .advanced-display .display-box-with-button {
+  border: 1px dashed var(--advanced-border-color);
+  box-shadow: 0 0 8px var(--advanced-glow-color);
+}
+
+/* --- MULTI-LINE CREDIT CALC STYLES --- */
+#lineItemsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.line-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 15px;
+  /* MODIFIED: The border now uses the semi-transparent accent color for a "soft highlight" effect. */
+  border: 2px solid var(--primary-accent);
+  border-radius: 8px;
+  background-color: var(--secondary-bg); /* Ensure background is solid to prevent seeing through */
+}
+
+.delete-line-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.2em;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.2s ease;
+}
+.delete-line-btn:hover {
+  color: var(--clear-button-text);
+}
+
+.line-item-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.credit-highlight {
+  color: #16A34A; /* A nice, modern green */
+  border-color: #BEF264;
+}
+body.theme-dark .credit-highlight {
+  border-color: #4D7C0F;
+}
+
+.add-line-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px dashed var(--primary-accent);
+  background-color: var(--primary-bg);
+  color: var(--primary-accent);
+  font-size: 2em;
+  font-weight: 300;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px auto 0;
+  transition: all 0.2s ease;
+}
+.add-line-button:hover {
+  background-color: var(--primary-accent);
+  color: white;
+}
+
+
+/* --- SETTINGS PAGE STYLES --- */
+.settings-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+.tab-button {
+  flex-grow: 1;
+  padding: 12px 10px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 1em;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  margin-bottom: -1px; /* Overlap with container border */
+}
+.tab-button:hover {
+  color: var(--text-primary);
+}
+.tab-button.selected {
+  color: var(--primary-accent);
+  border-bottom-color: var(--primary-accent);
+  transition: filter 0.2s ease;
+}
+
+.tab-button.selected:hover {
+  filter: brightness(90%);
+}
+
+.settings-content {
+  display: none;
+}
+.settings-content.active {
+  display: block;
+}
+
+#about-settings .card-content {
+  align-items: center;
+}
+
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.setting-item.setting-item-row {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.setting-item__label {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.setting-item #zoomSlider {
+  width: 100%;
+}
+
+#zoomValueDisplay {
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: left;
+}
+#zoomSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    background: var(--primary-bg);
+    outline: none;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    transform-origin: center;
+}
+#zoomSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--secondary-bg);
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid var(--primary-accent);
+    box-shadow: var(--card-shadow);
+}
+input[type="color"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 80px;
+  height: 40px;
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+}
+input[type="color"]::-webkit-color-swatch {
+  border-radius: 6px;
+  border: none;
+}
+input[type="color"]::-moz-color-swatch {
+  border-radius: 6px;
+  border: none;
+}
+
+.about-section {
+    padding-top: 0;
+    width: 100%;
+}
+.about-section .about-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+.about-info a {
+  color: var(--primary-accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+.about-info a:hover {
+  text-decoration: underline;
+}
+.reset-button {
+    background-color: var(--clear-button-bg);
+    color: var(--clear-button-text);
+    padding: 12px 15px;
+    font-size: .9em;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    width: 100%;
+}
+.reset-button:hover {
+    background-color: var(--clear-button-hover-bg);
+}
+
 .help-icon {
   width: 18px;
   height: 18px;
-  background-color: var(--dark-border);
-  color: var(--text-medium);
+  background-color: var(--border-color);
+  color: var(--text-secondary);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -943,22 +807,21 @@ input[type="color"]::-moz-color-swatch {
   font-size: 0.8em;
   font-weight: bold;
   cursor: help;
-  position: relative; /* Needed for tooltip positioning */
+  position: relative;
 }
-
 .help-icon .tooltip {
   visibility: hidden;
-  width: 150px;
-  background-color: #333;
+  width: 200px;
+  background-color: #262626;
   color: #fff;
   text-align: left;
   border-radius: 6px;
   padding: 10px;
   position: absolute;
   z-index: 11;
-  top: 50%;
-  right: calc(100% + 10px);
-  transform: translateY(-50%);
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
   opacity: 0;
   transition: opacity 0.3s;
   font-size: 0.9em;
@@ -966,75 +829,21 @@ input[type="color"]::-moz-color-swatch {
   line-height: 1.4;
   pointer-events: none;
 }
-
-.help-icon .tooltip b {
-    color: lightgreen;
-}
-
 .help-icon:hover .tooltip {
   visibility: visible;
   opacity: 1;
-}
-
-.display-box-with-button {
-    background-color: var(--display-box-bg);
-    border: var(--display-box-border);
-    border-radius: 4px;
-    width: 100%;
-    box-sizing: border-box;
-    min-width: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 4px 0 8px;
-}
-
-.display-box-with-button span {
-    color: var(--text-highlight-color);
-    font-size: 1em;
-    font-weight: bold;
-    font-family: Monaco, Consolas, "Lucida Console", monospace;
-    flex-grow: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    padding: 8px 0;
-}
-
-#totalCreditValue,
-#whatTheyOweValue {
-  color: #4CAF50; /* Green text for final values, overrides theme highlight */
 }
 
 .action-button-inside {
     background: none;
     border: none;
     font-size: 1.4em;
-    color: var(--record-icon-color);
+    color: var(--text-secondary);
     cursor: pointer;
     padding: 5px;
-    transition: color 0.2s ease, transform 0.1s ease;
-    flex-shrink: 0;
+    transition: all 0.2s ease;
 }
-
 .action-button-inside:hover {
-    color: var(--record-icon-hover);
+    color: var(--primary-accent);
     transform: scale(1.1);
-}
-
-.about-section .about-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.9em;
-  color: var(--text-medium);
-}
-
-.about-info a {
-  color: var(--highlight-blue);
-  text-decoration: none;
-}
-
-.about-info a:hover {
-  text-decoration: underline;
 }

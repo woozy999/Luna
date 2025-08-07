@@ -5,9 +5,7 @@
  * Formats user-entered customer need details into a structured output.
  */
 
-// Import utility functions (for general use like saveSetting, if needed)
-// Note: formatCurrencyDisplay/parseCurrencyInput are not needed here, but utils.js is generally imported.
-import { generateTimestamp } from './utils.js'; 
+import { generateTimestamp, hexToRgba } from './utils.js'; 
 
 // ADDED: Utility function to save the current page to storage (for "remember last page")
 function saveCurrentPage(pagePath) {
@@ -35,12 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Storage Keys ---
   const STORAGE_KEY_INPUTS = 'lunaNeedFormatterInputs'; // New storage key for this tool's inputs
   const STORAGE_KEY_ZOOM = 'lunaZoomLevel';
-  const STORAGE_KEY_LUNA_TITLE_VISIBLE = 'lunaTitleVisible';
   const STORAGE_KEY_THEME_MODE = 'lunaThemeMode';
   const STORAGE_KEY_ACCENT_COLOR = 'lunaAccentColor';
-  const STORAGE_KEY_TEXT_COLOR = 'lunaTextColor';
-  const STORAGE_KEY_ADVANCED_MODE = 'lunaAdvancedModeEnabled'; // Though not directly used, useful for global settings load
-  const STORAGE_KEY_BRANDING_MODE = 'lunaBrandingMode'; // ADDED: New storage key
+  const STORAGE_KEY_BRANDING_MODE = 'lunaBrandingMode';
   const STORAGE_KEY_CARD_STATES = 'lunaNeedCardStates'; // For collapsible cards
 
   // --- Default Values for Need Formatter Inputs ---
@@ -52,66 +47,50 @@ document.addEventListener('DOMContentLoaded', () => {
     customerPhoneNumber: '',
     additionalComments: ''
   };
-  const defaultBrandingMode = 'luna'; // ADDED: Default branding mode
+  const defaultBrandingMode = 'luna';
+  const defaultThemeMode = 'dark';
+  const defaultAccentColor = '#3B82F6';
 
   /**
    * Applies the selected theme mode and colors to the document.
    * @param {string} mode - 'dark' or 'light'.
    * @param {string} accentColor - The hex code for the accent color.
-   * @param {string} textColor - The hex code for the highlight text color.
    */
-  function applyTheme(mode, accentColor, textColor) {
+  function applyTheme(mode, accentColor) {
     const body = document.body;
     const root = document.documentElement;
 
     body.classList.toggle('theme-dark', mode === 'dark');
     body.classList.toggle('theme-light', mode === 'light');
 
-    root.style.setProperty('--accent-color', accentColor);
-    root.style.setProperty('--text-highlight-color', textColor);
+    root.style.setProperty('--primary-accent', accentColor);
+    root.style.setProperty('--primary-accent-shadow', hexToRgba(accentColor, 0.2));
   }
 
   /**
-   * Applies the saved zoom level to the document body.
+   * Applies the saved zoom level to the document by changing the root font size.
    * @param {number} zoomLevel - The zoom level to apply (e.g., 1.0 for 100%).
    */
   function applyZoom(zoomLevel) {
-    document.body.style.zoom = zoomLevel;
-  }
-
-  /**
-   * Sets the visibility of the Luna title in the header.
-   * @param {boolean} isVisible - True to show the title, false to hide it.
-   */
-  function setLunaTitleVisibility(isVisible) {
-    if (lunaTitle) {
-      lunaTitle.classList.toggle('hidden-title', !isVisible);
-    }
+    const baseFontSize = 14; // Base font size in pixels.
+    document.documentElement.style.fontSize = `${baseFontSize * zoomLevel}px`;
   }
 
   /**
    * Sets the branding mode (Luna or TeamViewer) and updates UI elements.
-   * This function is needed on every page to ensure consistent branding.
    * @param {string} brandingMode - 'luna' or 'teamviewer'.
-   * @param {string} themeMode - 'dark' or 'light'. // ADDED: themeMode parameter
-   * @param {boolean} [shouldSave=false] - Whether to save the setting to storage (only settings page saves).
+   * @param {string} themeMode - 'dark' or 'light'.
    */
-  function setBrandingMode(brandingMode, themeMode, shouldSave = false) { // MODIFIED: Added themeMode param, default shouldSave
+  function setBrandingMode(brandingMode, themeMode) {
     const extensionIcon = document.querySelector('.extensionIcon');
-    const extensionTitle = document.getElementById('extensionTitle'); // 'Luna' text
+    const extensionTitle = document.getElementById('extensionTitle');
 
     if (extensionIcon) {
       extensionIcon.src = brandingMode === 'luna' ? '../icons/logo.png' : '../icons/tvicon.png';
-      // Apply invert filter ONLY if TeamViewer branding AND Dark Mode
-      extensionIcon.classList.toggle('inverted', brandingMode === 'teamviewer' && themeMode === 'dark'); // MODIFIED: Apply/remove 'inverted' class
+      extensionIcon.classList.toggle('inverted', brandingMode === 'teamviewer' && themeMode === 'dark');
     }
     if (extensionTitle) {
       extensionTitle.classList.toggle('hidden-title', brandingMode === 'teamviewer');
-    }
-
-    // Save to storage
-    if (shouldSave && typeof chrome !== 'undefined' && chrome.runtime) { // MODIFIED: Added check for chrome.runtime in case of isolated testing
-      chrome.runtime.sendMessage({ type: 'saveSetting', payload: { key: STORAGE_KEY_BRANDING_MODE, value: brandingMode } });
     }
   }
 
@@ -120,30 +99,17 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function loadGlobalSettings() {
     chrome.storage.local.get(
-      [STORAGE_KEY_ZOOM, STORAGE_KEY_LUNA_TITLE_VISIBLE, STORAGE_KEY_THEME_MODE, STORAGE_KEY_ACCENT_COLOR, STORAGE_KEY_TEXT_COLOR, STORAGE_KEY_BRANDING_MODE], // MODIFIED: Added STORAGE_KEY_BRANDING_MODE
+      [STORAGE_KEY_ZOOM, STORAGE_KEY_THEME_MODE, STORAGE_KEY_ACCENT_COLOR, STORAGE_KEY_BRANDING_MODE],
       (result) => {
         const zoom = parseFloat(result[STORAGE_KEY_ZOOM]) || 1.0;
         applyZoom(zoom);
 
-        // Apply Luna Title Visibility (initial setting, branding will override if TeamViewer)
-        const isTitleVisible = result[STORAGE_KEY_LUNA_TITLE_VISIBLE] !== false;
-        // setLunaTitleVisibility(isTitleVisible); // Commented out as branding mode will control visual hiding
+        const mode = result[STORAGE_KEY_THEME_MODE] || defaultThemeMode;
+        const accent = result[STORAGE_KEY_ACCENT_COLOR] || defaultAccentColor;
+        applyTheme(mode, accent);
 
-        const mode = result[STORAGE_KEY_THEME_MODE] || 'dark';
-        const accent = result[STORAGE_KEY_ACCENT_COLOR] || '#51a3f9';
-        const text = result[STORAGE_KEY_TEXT_COLOR] || '#ed5653';
-        applyTheme(mode, accent, text);
-
-        // Apply Branding Mode
-        const brandingMode = result[STORAGE_KEY_BRANDING_MODE] || defaultBrandingMode; // Default to 'luna'
-        setBrandingMode(brandingMode, mode); // MODIFIED: Call setBrandingMode, passing theme 'mode'
-
-        // Apply Luna Title Visibility based on settings AND branding
-        if (lunaTitle) {
-          const hideBasedOnSetting = result[STORAGE_KEY_LUNA_TITLE_VISIBLE] === false;
-          const hideBasedOnBranding = brandingMode === 'teamviewer';
-          lunaTitle.classList.toggle('hidden-title', hideBasedOnSetting || hideBasedOnBranding);
-        }
+        const brandingMode = result[STORAGE_KEY_BRANDING_MODE] || defaultBrandingMode;
+        setBrandingMode(brandingMode, mode);
       }
     );
   }

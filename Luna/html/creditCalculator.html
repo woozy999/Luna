@@ -17,35 +17,20 @@
 
   <div id="creditCalculatorPage" class="page-container">
 
-    <div class="card" id="card-credit-inputs">
-      <div class="card-header">
-        <span class="card-header-title">License Information</span>
-        <div class="card-header-actions">
-          <button class="collapse-toggle" title="Toggle Section">▼</button>
-          <div class="help-icon">?
-            <span class="tooltip">Enter the original license amount ($) and the date the license was purchased.</span>
-          </div>
-        </div>
-      </div>
-      <div class="card-content">
-        <div class="input-group">
-          <label for="creditAmountInput">*Amount:</label>
-          <input type="text" id="creditAmountInput" inputmode="decimal" placeholder="$0.00">
-        </div>
-        <div class="input-group">
-          <label for="purchaseDateInput">*Date of Purchase:</label>
-          <input type="text" id="purchaseDateInput" placeholder="mm/dd/yyyy">
-        </div>
-      </div>
+    <!-- NEW: View Toggle Buttons -->
+    <div class="main-menu-toggle-buttons">
+      <button id="singleLineToggleBtn" class="toggle-button selected" data-view="single">Single Line</button>
+      <button id="multiLineToggleBtn" class="toggle-button" data-view="multi">Multi Line</button>
     </div>
 
+    <!-- This card is now at the top for both views -->
     <div class="card" id="card-credit-options">
       <div class="card-header">
-        <span class="card-header-title">Duration</span>
+        <span class="card-header-title">Date Calculation</span>
         <div class="card-header-actions">
           <button class="collapse-toggle" title="Toggle Section">▼</button>
           <div class="help-icon">?
-            <span class="tooltip">Choose the date to calculate from (Today or a Custom Date) and set the total license duration (1, 2, or 3 years).</span>
+            <span class="tooltip">Choose the date to calculate all credit from. This applies to both Single and Multi Line modes.</span>
           </div>
         </div>
       </div>
@@ -67,44 +52,122 @@
             <input type="text" id="calculationDateInput" placeholder="mm/dd/yyyy">
           </div>
         </div>
-        <div class="integrations-section">
-          <label>License Duration</label>
-          <div class="toggle-buttons">
-            <button id="duration1yr" class="toggle-button selected" data-years="1">1yr</button>
-            <button id="duration2yr" class="toggle-button" data-years="2">2yr</button>
-            <button id="duration3yr" class="toggle-button" data-years="3">3yr</button>
+      </div>
+    </div>
+
+    <!-- Container for Single Line View -->
+    <div id="singleLineContainer">
+      <div class="card" id="card-credit-inputs">
+        <div class="card-header">
+          <span class="card-header-title">License Information</span>
+          <div class="card-header-actions">
+            <button class="collapse-toggle" title="Toggle Section">▼</button>
+            <div class="help-icon">?
+              <span class="tooltip">Enter the original license amount ($) and the date the license was purchased.</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="input-group">
+            <label for="creditAmountInput">*Amount:</label>
+            <input type="text" id="creditAmountInput" inputmode="decimal" placeholder="$0.00">
+          </div>
+          <div class="input-group">
+            <label for="purchaseDateInput">*Date of Purchase:</label>
+            <input type="text" id="purchaseDateInput" placeholder="mm/dd/yyyy">
+          </div>
+          <div id="singleLineDurationSection" class="integrations-section">
+            <label>License Duration</label>
+            <div class="toggle-buttons">
+              <button id="duration1yr" class="toggle-button selected" data-years="1">1yr</button>
+              <button id="duration2yr" class="toggle-button" data-years="2">2yr</button>
+              <button id="duration3yr" class="toggle-button" data-years="3">3yr</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Container for Multi Line View -->
+    <div id="multiLineContainer" class="hidden">
+      <div class="card" id="card-credit-multi-inputs">
+        <div class="card-header">
+          <span class="card-header-title">Line Items</span>
+           <div class="card-header-actions">
+            <button class="collapse-toggle" title="Toggle Section">▼</button>
+          </div>
+        </div>
+        <div class="card-content">
+          <div id="lineItemsContainer">
+            <!-- Line items will be dynamically inserted here by JS -->
+          </div>
+          <button id="addLineBtn" class="add-line-button" title="Add New Line">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Template for a Multi-Line Item -->
+    <template id="lineItemTemplate">
+      <div class="line-item">
+        <button class="delete-line-btn" title="Delete Line">🗑️</button>
+        <div class="input-group">
+          <label>Name (Optional)</label>
+          <input type="text" class="line-name">
+        </div>
+        <div class="input-group">
+          <label>*Amount</label>
+          <input type="text" class="line-amount" inputmode="decimal" placeholder="$0.00">
+        </div>
+        <div class="input-group">
+          <label>*Start Date</label>
+          <input type="text" class="line-start-date" placeholder="mm/dd/yyyy">
+        </div>
+        <div class="line-item-row">
+          <div class="input-group">
+            <label>License Duration</label>
+            <select class="line-duration">
+              <option value="1">1yr</option>
+              <option value="2">2yr</option>
+              <option value="3">3yr</option>
+              <option value="4">4yr</option>
+              <option value="5">5yr</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>End Date</label>
+            <input type="text" class="line-end-date" placeholder="mm/dd/yyyy">
+          </div>
+        </div>
+        <div class="display-group">
+          <label>Credit Remaining</label>
+          <div class="line-credit-display display-box credit-highlight">$0.00</div>
+        </div>
+      </div>
+    </template>
+
     <div class="card" id="card-credit-results">
       <div class="card-header">
-        <span class="card-header-title">Credit</span>
+        <span class="card-header-title">Final Credit</span>
         <div class="card-header-actions">
           <button class="collapse-toggle" title="Toggle Section">▼</button>
           <div class="help-icon">?
             <span class="tooltip">
-              Values calculated in $ <br><br>
-              <b>Expiration Date:</b> [Purchase Date] + [License Duration]<br><br>
-              <b>Days Remaining:</b> [Expiration Date] - [Calculation Start Date]<br><br>
-              <b>Credit per Day:</b> [Amount] / ([Duration] * 365)<br><br>
-              <b>Total Credit:</b> [Credit per Day] * [Days Remaining]
+              This section summarizes the total credit from all lines and calculates the final price after applying it to a new license cost.
             </span>
           </div>
         </div>
       </div>
       <div class="card-content">
         <div id="expirationDateDisplay" class="display-group">
-          <label>Expiration Date:</label>
+          <label>Expiration Date (Single Line)</label>
           <div class="display-box" id="expirationDateValue">N/A</div>
         </div>
         <div id="daysRemainingDisplay" class="display-group">
-          <label>Days Remaining:</label>
+          <label>Days Remaining (Single Line)</label>
           <div class="display-box" id="daysRemainingValue">N/A</div>
         </div>
         <div id="creditPerDayDisplay" class="display-group advanced-display hidden">
-          <label>Credit per Day <span class="advanced-tag">(ADVANCED)</span>:</label>
+          <label>Credit per Day (Single Line) <span class="advanced-tag">(ADVANCED)</span>:</label>
           <div class="display-box" id="creditPerDayValue">$0.00</div>
         </div>
         <div class="display-group">
