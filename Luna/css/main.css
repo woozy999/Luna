@@ -233,6 +233,7 @@ body {
 
 .main-menu-toggle-buttons .toggle-button {
     flex-grow: 1;
+    flex-basis: 0; /* MODIFIED: Ensures perfect 50/50 split */
     border: none;
     border-radius: 0;
     color: var(--text-secondary);
@@ -287,7 +288,8 @@ body {
   box-sizing: border-box;
 }
 
-.input-group label {
+.input-group label,
+.integrations-section > label {
   font-size: 0.9em;
   font-weight: 500;
   margin-bottom: 8px;
@@ -297,6 +299,7 @@ body {
 .input-group input[type="text"],
 .input-group input[type="number"],
 .input-group textarea,
+.input-group select,
 .line-item input[type="text"],
 .line-item select {
   background-color: var(--primary-bg);
@@ -315,6 +318,7 @@ body {
 .input-group input[type="text"]:focus,
 .input-group input[type="number"]:focus,
 .input-group textarea:focus,
+.input-group select:focus,
 .line-item input[type="text"]:focus,
 .line-item select:focus {
   outline: none;
@@ -407,10 +411,19 @@ body {
 
 #formattedOutput {
   white-space: pre-wrap;
+  word-wrap: break-word; /* Ensure wrapping for long strings */
   overflow: auto;
   min-height: 120px;
   color: var(--text-secondary);
   font-weight: normal;
+}
+
+/* MODIFIED: This now applies to the div as well */
+#responseOutput {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow: auto;
+  min-height: 120px;
 }
 
 .display-box-with-button {
@@ -820,8 +833,9 @@ input[type="color"]::-moz-color-swatch {
   position: absolute;
   z-index: 11;
   bottom: 125%;
-  left: 50%;
-  margin-left: -100px;
+  /* MODIFIED: CSS fix for tooltip positioning */
+  left: auto;
+  right: 0;
   opacity: 0;
   transition: opacity 0.3s;
   font-size: 0.9em;
@@ -846,4 +860,157 @@ input[type="color"]::-moz-color-swatch {
 .action-button-inside:hover {
     color: var(--primary-accent);
     transform: scale(1.1);
+}
+
+/* MODIFIED: Renamed save button class and updated colors */
+.toggle-button.confirm-action-button {
+  background-color: #D1FAE5;
+  color: #2e582d;
+  border-color: #A7F3D0;
+}
+.toggle-button.confirm-action-button:hover {
+  background-color: #A7F3D0;
+}
+body.theme-dark .toggle-button.confirm-action-button {
+  background-color: #064E3B;
+  color: #A7F3D0;
+  border-color: #059669;
+}
+body.theme-dark .toggle-button.confirm-action-button:hover {
+  background-color: #043A2A;
+}
+
+/* ADDED: Green footer button */
+.footer-button.confirm-action-button {
+    background-color: #dcfce7;
+    color: #2e582d;
+}
+.footer-button.confirm-action-button:hover {
+    background-color: #bbf7d0;
+}
+body.theme-dark .footer-button.confirm-action-button {
+    background-color: #166534;
+    color: #dcfce7;
+}
+body.theme-dark .footer-button.confirm-action-button:hover {
+    background-color: #15803d;
+}
+
+
+.toggle-button.delete-button-color {
+  background-color: var(--clear-button-bg);
+  color: var(--clear-button-text);
+  border-color: #FECACA;
+}
+.toggle-button.delete-button-color:hover {
+  background-color: var(--clear-button-hover-bg);
+}
+body.theme-dark .toggle-button.delete-button-color {
+  background-color: var(--clear-button-bg);
+  color: var(--clear-button-text);
+  border-color: #991B1B;
+}
+body.theme-dark .toggle-button.delete-button-color:hover {
+  background-color: var(--clear-button-hover-bg);
+}
+
+/* Divider for forms */
+hr.form-divider {
+  width: 100%;
+  border: none;
+  height: 1px;
+  background-color: var(--border-color);
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* --- Template Browser styles --- */
+.template-browser ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+.template-browser .folder-item {
+  display: flex;
+  flex-direction: column;
+}
+.template-browser .folder-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+.template-browser .folder-header:hover {
+  background-color: var(--primary-bg);
+}
+
+.template-browser .folder-name {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.template-browser .folder-name::before {
+  content: '▶';
+  font-size: 0.7em;
+  transition: transform 0.2s;
+}
+.template-browser .folder-name.open::before {
+  transform: rotate(90deg);
+}
+
+.template-browser .folder-actions {
+  display: flex;
+  gap: 8px;
+  opacity: 0; /* Hidden by default */
+  transition: opacity 0.2s ease;
+}
+.template-browser .folder-header:hover .folder-actions {
+  opacity: 1; /* Show on hover */
+}
+.folder-action-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1em;
+  padding: 2px;
+}
+.folder-action-icon.edit-icon { color: var(--primary-accent); }
+.folder-action-icon.delete-icon { color: var(--clear-button-text); }
+
+
+.template-browser .template-list {
+  padding-left: 20px;
+}
+.template-browser .template-item {
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  font-size: 0.95em;
+}
+.template-browser .template-item:hover {
+  background-color: var(--primary-bg);
+}
+.template-browser .template-item.selected {
+  background-color: var(--primary-accent-shadow);
+  color: var(--primary-accent);
+  font-weight: 500;
+}
+.card-header-actions .action-button {
+  background-color: var(--primary-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 0.8em;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.card-header-actions .action-button:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
 }

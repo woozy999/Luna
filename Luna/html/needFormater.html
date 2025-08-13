@@ -16,81 +16,175 @@
   </div>
 
   <div id="needFormatterPage" class="page-container">
+    
+    <!-- View Toggle Buttons -->
+    <div class="main-menu-toggle-buttons">
+      <button id="needFormatterToggleBtn" class="toggle-button selected" data-view="formatter">Need Formatter</button>
+      <button id="responseToggleBtn" class="toggle-button" data-view="response">Response</button>
+    </div>
 
-    <div class="card" id="card-need-info">
-      <div class="card-header">
-        <span class="card-header-title">Ticket Data</span>
-        <div class="card-header-actions">
-          <button class="collapse-toggle" title="Toggle Section">▼</button>
-          <div class="help-icon">?
-            <span class="tooltip">Enter the ticket number and select the current invoice status (Paid or Posted).</span>
+    <!-- Container for Original Need Formatter View -->
+    <div id="needFormatterViewContainer">
+      <div class="card" id="card-need-info">
+        <div class="card-header">
+          <span class="card-header-title">Ticket Data</span>
+          <div class="card-header-actions">
+            <button class="collapse-toggle" title="Toggle Section">▼</button>
+            <div class="help-icon">?
+              <span class="tooltip">Enter the ticket number and select the current invoice status (Paid or Posted).</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="input-group">
+            <label for="ticketNumberInput">Ticket #:</label>
+            <input type="text" id="ticketNumberInput" maxlength="8">
+          </div>
+          <div class="integrations-section">
+            <label>Invoice Status:</label>
+            <div class="toggle-buttons">
+              <button id="statusPaid" class="toggle-button selected" data-value="Paid">Paid</button>
+              <button id="statusPosted" class="toggle-button" data-value="Posted">Posted</button>
+            </div>
           </div>
         </div>
       </div>
-      <div class="card-content">
-        <div class="input-group">
-          <label for="ticketNumberInput">Ticket #:</label>
-          <input type="text" id="ticketNumberInput" maxlength="8">
-        </div>
-        <div class="integrations-section">
-          <label>Invoice Status:</label>
-          <div class="toggle-buttons">
-            <button id="statusPaid" class="toggle-button selected" data-value="Paid">Paid</button>
-            <button id="statusPosted" class="toggle-button" data-value="Posted">Posted</button>
+
+      <div class="card" id="card-need-details">
+        <div class="card-header">
+          <span class="card-header-title">Customer Info</span>
+          <div class="card-header-actions">
+            <button class="collapse-toggle" title="Toggle Section">▼</button>
+            <div class="help-icon">?
+              <span class="tooltip">Enter the details of the customer's request and their contact information. All fields are optional but recommended.</span>
+            </div>
           </div>
+        </div>
+        <div class="card-content">
+          <div class="input-group">
+            <label for="customerRequestInput">Customer Request:</label>
+            <textarea id="customerRequestInput" rows="6"></textarea>
+          </div>
+          <div class="input-group">
+            <label for="customerEmailInput">Email:</label>
+            <input type="text" id="customerEmailInput">
+          </div>
+          <div class="input-group">
+            <label for="customerPhoneNumberInput">Phone Number:</label>
+            <input type="text" id="customerPhoneNumberInput">
+          </div>
+          <div class="input-group">
+            <label for="additionalCommentsInput">Additional Comments:</label>
+            <textarea id="additionalCommentsInput" rows="4"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="output-section card" id="card-need-output">
+        <div class="card-header">
+          <span class="card-header-title">Output</span>
+          <div class="card-header-actions">
+            <button class="collapse-toggle" title="Toggle Section">▼</button>
+            <div class="help-icon">?
+              <span class="tooltip">This is the formatted text ready to be copied. It updates automatically as you type in the fields above.</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-content">
+          <pre id="formattedOutput" class="display-box"></pre>
+          <button id="copyOutputBtn" class="footer-button complete-button">📋 Copy to Clipboard</button>
         </div>
       </div>
     </div>
 
-    <div class="card" id="card-need-details">
-      <div class="card-header">
-        <span class="card-header-title">Customer Info</span>
-        <div class="card-header-actions">
-          <button class="collapse-toggle" title="Toggle Section">▼</button>
-          <div class="help-icon">?
-            <span class="tooltip">Enter the details of the customer's request and their contact information. All fields are optional but recommended.</span>
-          </div>
+    <!-- Container for New Response Template View -->
+    <div id="responseViewContainer" class="hidden">
+        <div class="card" id="card-response-template">
+            <div class="card-header">
+                <span class="card-header-title">Templates</span>
+                 <div class="card-header-actions">
+                    <button id="newTemplateBtn" class="action-button">New Template</button>
+                    <button id="newFolderBtn" class="action-button">New Folder</button>
+                    <button class="collapse-toggle" title="Toggle Section">▼</button>
+                </div>
+            </div>
+            <div id="templateBrowser" class="card-content template-browser">
+                <!-- Template browser will be dynamically generated here -->
+            </div>
         </div>
-      </div>
-      <div class="card-content">
-        <div class="input-group">
-          <label for="customerRequestInput">Customer Request:</label>
-          <textarea id="customerRequestInput" rows="6"></textarea>
+
+        <div class="card" id="card-template-manager">
+            <div class="card-header">
+                <span class="card-header-title">Template Editor</span>
+                <div class="card-header-actions">
+                    <button class="collapse-toggle" title="Toggle Section">▼</button>
+                    <div class="help-icon">?
+                        <span class="tooltip">Use &lt;b&gt;bold&lt;/b&gt;, &lt;i&gt;italic&lt;/i&gt;, &lt;u&gt;underline&lt;/u&gt; for formatting. Create fields with {{FIELD_NAME}} and dropdowns with {{DROPDOWN:Opt1|Opt2}}.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="input-group">
+                    <label for="templateNameInput">Template Name</label>
+                    <input type="text" id="templateNameInput" placeholder="e.g., Order Termination">
+                </div>
+                <div class="input-group">
+                    <label for="templateFolderSelect">Folder</label>
+                    <select id="templateFolderSelect"></select>
+                </div>
+                <div class="input-group">
+                    <label for="templateBodyInput">Template Body</label>
+                    <textarea id="templateBodyInput" rows="6" placeholder="e.g., <b>Hello {{NAME}}</b>, your order is confirmed."></textarea>
+                </div>
+                <hr class="form-divider">
+                <div class="toggle-buttons">
+                    <button id="saveTemplateBtn" class="toggle-button confirm-action-button">Save</button>
+                    <button id="deleteTemplateBtn" class="toggle-button delete-button-color">Delete</button>
+                </div>
+                <div class="toggle-buttons">
+                    <button id="importTemplatesBtn" class="toggle-button">Import</button>
+                    <button id="exportTemplatesBtn" class="toggle-button">Export All</button>
+                    <input type="file" id="templateFileInput" class="hidden" accept=".txt,.json">
+                </div>
+            </div>
         </div>
-        <div class="input-group">
-          <label for="customerEmailInput">Email:</label>
-          <input type="text" id="customerEmailInput">
+        
+        <div class="card" id="card-response-fillable">
+            <div class="card-header">
+                <span class="card-header-title">Fillable Fields</span>
+                 <div class="card-header-actions">
+                    <button class="collapse-toggle" title="Toggle Section">▼</button>
+                    <div class="help-icon">?
+                        <span class="tooltip">These fields are automatically generated from the {{PLACEHOLDERS}} in the selected template.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-content" id="dynamicInputsContainer">
+                <p class="text-secondary">Select a template to see its fields.</p>
+            </div>
         </div>
-        <div class="input-group">
-          <label for="customerPhoneNumberInput">Phone Number:</label>
-          <input type="text" id="customerPhoneNumberInput">
+
+        <div class="output-section card" id="card-response-output">
+            <div class="card-header">
+                <span class="card-header-title">Response Output</span>
+                <div class="card-header-actions">
+                    <button class="collapse-toggle" title="Toggle Section">▼</button>
+                    <div class="help-icon">?
+                        <span class="tooltip">This is the final generated response. It updates in real-time as you fill in the fields above.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-content">
+                <div id="responseOutput" class="display-box"></div>
+                <button id="copyResponseBtn" class="footer-button confirm-action-button">📋 Copy Response</button>
+            </div>
         </div>
-        <div class="input-group">
-          <label for="additionalCommentsInput">Additional Comments:</label>
-          <textarea id="additionalCommentsInput" rows="4"></textarea>
-        </div>
-      </div>
     </div>
 
-    <div class="output-section card" id="card-need-output">
-      <div class="card-header">
-        <span class="card-header-title">Output</span>
-        <div class="card-header-actions">
-          <button class="collapse-toggle" title="Toggle Section">▼</button>
-          <div class="help-icon">?
-            <span class="tooltip">This is the formatted text ready to be copied. It updates automatically as you type in the fields above.</span>
-          </div>
-        </div>
-      </div>
-      <div class="card-content">
-        <pre id="formattedOutput" class="display-box"></pre>
-        <button id="copyOutputBtn" class="footer-button complete-button">📋 Copy to Clipboard</button>
-      </div>
-    </div>
 
   </div>
 
-  <!-- Calculator Footer Bar (Reusing for consistency, though only Copy button is in main area) -->
+  <!-- Calculator Footer Bar (Reusing for consistency) -->
   <div id="calculatorFooter" class="calculator-footer-bar">
     <button id="clearAllBtn" class="footer-button clear-button">🗑️ Clear All</button>
   </div>

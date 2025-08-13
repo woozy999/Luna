@@ -109,8 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
+  // MODIFIED: Changed applyZoom to use root font-size for consistency.
   function applyZoom(zoomLevel) {
-    document.body.style.zoom = zoomLevel;
+    const baseFontSize = 14; // Base font size in pixels.
+    document.documentElement.style.fontSize = `${baseFontSize * zoomLevel}px`;
   }
 
   function setAdvancedMode(isEnabled) {
