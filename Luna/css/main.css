@@ -23,6 +23,10 @@
   
   --complete-button-bg: var(--primary-accent);
   --complete-button-text: #FFFFFF;
+  
+  --confirm-green-bg: #16a34a;
+  --confirm-green-hover-bg: #15803d;
+  --confirm-green-text: #ffffff;
 
   /* Advanced Mode Colors */
   --advanced-border-color: #F97316; /* Orange-500 */
@@ -313,6 +317,11 @@ body {
   resize: vertical;
   font-family: var(--font-sans);
   transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#templateBodyInput {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
 }
 
 .input-group input[type="text"]:focus,
@@ -862,57 +871,51 @@ input[type="color"]::-moz-color-swatch {
     transform: scale(1.1);
 }
 
-/* MODIFIED: Renamed save button class and updated colors */
+/* MODIFIED: Save button is now always green */
 .toggle-button.confirm-action-button {
-  background-color: #D1FAE5;
-  color: #2e582d;
-  border-color: #A7F3D0;
+  background-color: var(--confirm-green-bg);
+  color: var(--confirm-green-text);
+  border-color: var(--confirm-green-bg);
 }
 .toggle-button.confirm-action-button:hover {
-  background-color: #A7F3D0;
-}
-body.theme-dark .toggle-button.confirm-action-button {
-  background-color: #064E3B;
-  color: #A7F3D0;
-  border-color: #059669;
-}
-body.theme-dark .toggle-button.confirm-action-button:hover {
-  background-color: #043A2A;
+  background-color: var(--confirm-green-hover-bg);
+  border-color: var(--confirm-green-hover-bg);
+  filter: none;
 }
 
-/* ADDED: Green footer button */
+/* ADDED: Green footer button for copy */
 .footer-button.confirm-action-button {
     background-color: #dcfce7;
-    color: #2e582d;
+    color: #166534;
 }
 .footer-button.confirm-action-button:hover {
     background-color: #bbf7d0;
 }
 body.theme-dark .footer-button.confirm-action-button {
-    background-color: #166534;
+    background-color: #14532d;
     color: #dcfce7;
 }
 body.theme-dark .footer-button.confirm-action-button:hover {
-    background-color: #15803d;
+    background-color: #166534;
 }
 
-
+/* MODIFIED: Changed delete button style to better match clear button */
 .toggle-button.delete-button-color {
   background-color: var(--clear-button-bg);
   color: var(--clear-button-text);
-  border-color: #FECACA;
+  border-color: var(--clear-button-bg);
 }
 .toggle-button.delete-button-color:hover {
   background-color: var(--clear-button-hover-bg);
+  border-color: var(--clear-button-hover-bg);
 }
 body.theme-dark .toggle-button.delete-button-color {
-  background-color: var(--clear-button-bg);
-  color: var(--clear-button-text);
-  border-color: #991B1B;
+  border-color: #450a0a;
 }
 body.theme-dark .toggle-button.delete-button-color:hover {
-  background-color: var(--clear-button-hover-bg);
+   border-color: #5f2e2e;
 }
+
 
 /* Divider for forms */
 hr.form-divider {
@@ -991,6 +994,9 @@ hr.form-divider {
   border-radius: 6px;
   transition: background-color 0.2s;
   font-size: 0.95em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .template-browser .template-item:hover {
   background-color: var(--primary-bg);
@@ -1013,4 +1019,53 @@ hr.form-divider {
 .card-header-actions .action-button:hover {
   border-color: var(--text-secondary);
   color: var(--text-primary);
+}
+
+.favorite-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    color: var(--text-secondary);
+    padding: 0 4px;
+    opacity: 0.3;
+    transition: all 0.2s ease;
+}
+.template-item:hover .favorite-toggle,
+.favorite-toggle.favorited {
+    opacity: 1;
+}
+.favorite-toggle.favorited {
+    color: #facc15; /* A nice gold/yellow color */
+}
+
+/* --- Editor Toolbar --- */
+.editor-toolbar {
+    display: flex;
+    gap: 2px;
+    background-color: var(--primary-bg);
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    padding: 6px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+.editor-toolbar button {
+    background: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: background-color 0.2s;
+}
+.editor-toolbar button:hover {
+    background-color: var(--border-color);
+}
+
+.import-export-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }

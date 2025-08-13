@@ -134,6 +134,11 @@
                 </div>
                 <div class="input-group">
                     <label for="templateBodyInput">Template Body</label>
+                    <div class="editor-toolbar">
+                        <button id="toolbar-bold" title="Bold"><b>B</b></button>
+                        <button id="toolbar-italic" title="Italic"><i>I</i></button>
+                        <button id="toolbar-underline" title="Underline"><u>U</u></button>
+                    </div>
                     <textarea id="templateBodyInput" rows="6" placeholder="e.g., <b>Hello {{NAME}}</b>, your order is confirmed."></textarea>
                 </div>
                 <hr class="form-divider">
@@ -141,9 +146,12 @@
                     <button id="saveTemplateBtn" class="toggle-button confirm-action-button">Save</button>
                     <button id="deleteTemplateBtn" class="toggle-button delete-button-color">Delete</button>
                 </div>
-                <div class="toggle-buttons">
-                    <button id="importTemplatesBtn" class="toggle-button">Import</button>
-                    <button id="exportTemplatesBtn" class="toggle-button">Export All</button>
+                <div class="toggle-buttons import-export-section">
+                    <div class="toggle-buttons">
+                        <button id="exportAllBtn" class="toggle-button">Export All</button>
+                        <button id="exportSelectedBtn" class="toggle-button">Export Selected</button>
+                    </div>
+                    <button id="importBtn" class="toggle-button">Import</button>
                     <input type="file" id="templateFileInput" class="hidden" accept=".txt,.json">
                 </div>
             </div>
