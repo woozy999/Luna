@@ -403,12 +403,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const plainTextPercentage = String(rawNumber);
 
     navigator.clipboard.writeText(plainTextPercentage).then(() => {
-        const originalText = copyErpDiscountBtn.innerHTML;
-        copyErpDiscountBtn.innerHTML = '✅';
+        const originalHTML = copyErpDiscountBtn.innerHTML;
+        const originalTitle = copyErpDiscountBtn.title;
+        copyErpDiscountBtn.innerHTML = 'Copied!';
         copyErpDiscountBtn.title = 'Copied!';
         setTimeout(() => {
-            copyErpDiscountBtn.innerHTML = '📋';
-            copyErpDiscountBtn.title = 'Copy Percentage';
+            copyErpDiscountBtn.innerHTML = originalHTML;
+            copyErpDiscountBtn.title = originalTitle;
         }, 1500);
     }).catch(err => {
         console.error('Could not copy text: ', err);

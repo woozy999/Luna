@@ -31,7 +31,7 @@
           <div class="card-header-actions">
             <button class="collapse-toggle" title="Toggle Section">▼</button>
             <div class="help-icon">?
-              <span class="tooltip">Enter the ticket number and select the current invoice status (Paid or Posted).</span>
+              <span class="tooltip">Enter the ticket number and select the current invoice status (Paid or Posted). This data can be used in the 'Response' tab with system variables like {{$TICKET_NUMBER}}.</span>
             </div>
           </div>
         </div>
@@ -108,8 +108,11 @@
                     <button class="collapse-toggle" title="Toggle Section">▼</button>
                 </div>
             </div>
-            <div id="templateBrowser" class="card-content template-browser">
-                <!-- Template browser will be dynamically generated here -->
+            <div class="card-content template-browser-container">
+                 <input type="text" id="templateSearchInput" placeholder="🔍 Search templates..." class="search-input">
+                <div id="templateBrowser" class="template-browser">
+                    <!-- Template browser will be dynamically generated here -->
+                </div>
             </div>
         </div>
 
@@ -119,7 +122,7 @@
                 <div class="card-header-actions">
                     <button class="collapse-toggle" title="Toggle Section">▼</button>
                     <div class="help-icon">?
-                        <span class="tooltip">Use &lt;b&gt;bold&lt;/b&gt;, &lt;i&gt;italic&lt;/i&gt;, &lt;u&gt;underline&lt;/u&gt; for formatting. Create fields with {{FIELD_NAME}} and dropdowns with {{DROPDOWN:Opt1|Opt2}}.</span>
+                        <span class="tooltip">Use the toolbar for formatting. For advanced placeholder syntax like conditionals and default values, see the official guide.</span>
                     </div>
                 </div>
             </div>
@@ -135,23 +138,49 @@
                 <div class="input-group">
                     <label for="templateBodyInput">Template Body</label>
                     <div class="editor-toolbar">
+                        <!--
+                        <select id="toolbar-font" class="toolbar-select">
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="Georgia, serif">Georgia</option>
+                            <option value="Courier New, monospace">Courier New</option>
+                            <option value="Times New Roman, serif">Times New Roman</option>
+                            <option value="Verdana, sans-serif">Verdana</option>
+                        </select>
+                        <select id="toolbar-format" class="toolbar-select">
+                            <option value="p">Paragraph</option>
+                            <option value="h1">Heading 1</option>
+                            <option value="h2">Heading 2</option>
+                        </select>
+                        -->
                         <button id="toolbar-bold" title="Bold"><b>B</b></button>
                         <button id="toolbar-italic" title="Italic"><i>I</i></button>
                         <button id="toolbar-underline" title="Underline"><u>U</u></button>
+                        <button id="toolbar-ul" title="Unordered List"><svg viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M2 4a1 1 0 100 2 1 1 0 000-2zm3.75-1.5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zM3 9a1 1 0 11-2 0 1 1 0 012 0zm-1 5a1 1 0 100-2 1 1 0 000 2z"/></svg></button>
+                        <button id="toolbar-ol" title="Ordered List"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2.281 2.453a.75.75 0 00-1.062 1.062L2.438 5H2.25a.75.75 0 000 1.5h1.5a.75.75 0 000-1.5H3.188L2.28 2.453zM6 4.75a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 016 4.75zm.75 3.5a.75.75 0 000 1.5h7.5a.75.75 0 000-1.5h-7.5zM6 11.75a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 016 11.75zM2.56 8.53a.75.75 0 00-1.12 1.004l.832 1.109a1.25 1.25 0 101.815-1.63l-.832-1.109a.75.75 0 00-.695-.374z"/></svg></button>
+                        <button id="toolbar-a" title="Link">🔗</button>
+                        <label class="toolbar-color-picker-label" title="Text Color">
+                          <input type="color" id="toolbar-color">
+                          <span>A</span>
+                        </label>
+                        <button id="toolbar-clear" title="Clear Formatting">⌫</button>
                     </div>
-                    <textarea id="templateBodyInput" rows="6" placeholder="e.g., <b>Hello {{NAME}}</b>, your order is confirmed."></textarea>
+                    <div id="editorContextBar" class="editor-context-bar hidden">
+                      <span>🔗</span>
+                      <input type="text" id="linkUrlInput" placeholder="https://example.com">
+                      <button id="linkSaveBtn" class="confirm-action-button">Save</button>
+                      <button id="linkUnlinkBtn" class="delete-button-color">Unlink</button>
+                    </div>
+                    <div id="templateBodyInput" class="content-editable-editor" contenteditable="true"></div>
                 </div>
                 <hr class="form-divider">
                 <div class="toggle-buttons">
                     <button id="saveTemplateBtn" class="toggle-button confirm-action-button">Save</button>
                     <button id="deleteTemplateBtn" class="toggle-button delete-button-color">Delete</button>
                 </div>
-                <div class="toggle-buttons import-export-section">
-                    <div class="toggle-buttons">
-                        <button id="exportAllBtn" class="toggle-button">Export All</button>
-                        <button id="exportSelectedBtn" class="toggle-button">Export Selected</button>
-                    </div>
-                    <button id="importBtn" class="toggle-button">Import</button>
+                <div class="action-button-group">
+                    <button id="exportAllBtn" class="action-button-group-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z"/><path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z"/></svg>Export All</button>
+                    <button id="exportSelectedBtn" class="action-button-group-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 3a.75.75 0 01.75.75v10.638l3.47-3.47a.75.75 0 111.06 1.06l-4.75 4.75a.75.75 0 01-1.06 0l-4.75-4.75a.75.75 0 111.06-1.06l3.47 3.47V3.75A.75.75 0 0110 3z"/><path d="M3.75 2A1.75 1.75 0 002 3.75v12.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0018 16.25V3.75A1.75 1.75 0 0016.25 2H3.75zM3.5 3.75a.25.25 0 01.25-.25h12.5a.25.25 0 01.25.25v12.5a.25.25 0 01-.25.25H3.75a.25.25 0 01-.25-.25V3.75z"/></svg>Export Selected</button>
+                    <button id="importBtn" class="action-button-group-item"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z"/><path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z"/></svg>Import</button>
                     <input type="file" id="templateFileInput" class="hidden" accept=".txt,.json">
                 </div>
             </div>

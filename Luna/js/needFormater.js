@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // New Response Template Elements
   const newTemplateBtn = document.getElementById('newTemplateBtn');
   const newFolderBtn = document.getElementById('newFolderBtn');
+  const templateSearchInput = document.getElementById('templateSearchInput');
   const templateBrowser = document.getElementById('templateBrowser');
   const templateNameInput = document.getElementById('templateNameInput');
   const templateFolderSelect = document.getElementById('templateFolderSelect');
@@ -55,10 +56,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const responseOutput = document.getElementById('responseOutput');
   const copyResponseBtn = document.getElementById('copyResponseBtn');
 
-  // Rich Text Editor Toolbar Buttons
+  // Rich Text Editor Toolbar Buttons & Context Bar
+  // const toolbarFont = document.getElementById('toolbar-font');
+  // const toolbarFormat = document.getElementById('toolbar-format');
   const toolbarBold = document.getElementById('toolbar-bold');
   const toolbarItalic = document.getElementById('toolbar-italic');
   const toolbarUnderline = document.getElementById('toolbar-underline');
+  const toolbarUl = document.getElementById('toolbar-ul');
+  const toolbarOl = document.getElementById('toolbar-ol');
+  const toolbarA = document.getElementById('toolbar-a');
+  const toolbarColor = document.getElementById('toolbar-color');
+  const toolbarClear = document.getElementById('toolbar-clear');
+  const editorContextBar = document.getElementById('editorContextBar');
+  const linkUrlInput = document.getElementById('linkUrlInput');
+  const linkSaveBtn = document.getElementById('linkSaveBtn');
+  const linkUnlinkBtn = document.getElementById('linkUnlinkBtn');
   
   // --- Storage Keys ---
   const STORAGE_KEY_INPUTS = 'lunaNeedFormatterInputs'; // For original formatter
@@ -76,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let templates = [];
   let folders = [];
   let selectedTemplateId = null;
+  let currentLinkElement = null;
 
   // --- Default Values ---
   const defaultNeedFormatterInputs = {
@@ -259,20 +272,46 @@ document.addEventListener('DOMContentLoaded', () => {
   
   function getPlaceholders(text) {
       const regex = /{{\s*([a-zA-Z0-9_]+)(?::([^}]+))?\s*}}/g;
-      const placeholders = [];
+      const placeholders = new Map();
       let match;
       while ((match = regex.exec(text)) !== null) {
           const name = match[1];
-          const options = match[2];
-          if (!placeholders.some(p => p.name === name)) {
-              placeholders.push({
-                  name: name,
-                  type: options ? 'dropdown' : 'simple',
-                  options: options ? options.split('|').map(o => o.trim()) : []
-              });
+          if (placeholders.has(name) || name.startsWith('$')) continue;
+
+          const optionsString = match[2] || '';
+          let type = 'simple';
+          let options = [];
+          let defaultValue = '';
+
+          if (optionsString.includes('default=')) {
+              const defaultMatch = optionsString.match(/default=([^|]*)/);
+              if (defaultMatch) defaultValue = defaultMatch[1];
           }
+          
+          const potentialOptions = optionsString.replace(/default=[^|]*/, '').split('|').map(o => o.trim()).filter(Boolean);
+          if (potentialOptions.length > 0) {
+              type = 'dropdown';
+              options = potentialOptions;
+          }
+
+          placeholders.set(name, { name, type, options, defaultValue });
       }
-      return placeholders;
+      return Array.from(placeholders.values());
+  }
+
+  function getSystemVariableValue(varName) {
+      const inputs = getFormatterInputsState();
+      switch(varName) {
+          case '$TICKET_NUMBER': return inputs.ticketNumber;
+          case '$INVOICE_STATUS': return inputs.invoiceStatus;
+          case '$CUSTOMER_REQUEST': return inputs.customerRequest;
+          case '$CUSTOMER_EMAIL': return inputs.customerEmail;
+          case '$CUSTOMER_PHONE': return inputs.customerPhoneNumber;
+          case '$ADDITIONAL_COMMENTS': return inputs.additionalComments;
+          case '$DATE': return new Date().toLocaleDateString();
+          case '$TIME': return new Date().toLocaleTimeString();
+          default: return '';
+      }
   }
 
   function renderDynamicInputs(templateId) {
@@ -314,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             inputElement.id = `dyn-input-${p.name}`;
             inputElement.dataset.placeholder = p.name;
-            inputElement.value = state.dynamicInputs[p.name] || (p.type === 'dropdown' ? p.options[0] : '');
+            inputElement.value = state.dynamicInputs[p.name] || p.defaultValue || (p.type === 'dropdown' ? p.options[0] : '');
             
             inputElement.addEventListener('input', () => {
                 updateResponseOutput();
@@ -335,25 +374,35 @@ document.addEventListener('DOMContentLoaded', () => {
           responseOutput.innerHTML = '';
           return;
       }
-      let outputHtml = template.body.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      // Convert newlines to <br> for HTML rendering, then selectively un-escape formatting tags.
-      outputHtml = outputHtml.replace(/\n/g, '<br>');
-      outputHtml = outputHtml.replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\/b&gt;/g, '</b>')
-                             .replace(/&lt;i&gt;/g, '<i>').replace(/&lt;\/i&gt;/g, '</i>')
-                             .replace(/&lt;u&gt;/g, '<u>').replace(/&lt;\/u&gt;/g, '</u>');
 
+      let outputText = template.body;
+
+      // 1. Resolve system variables
+      outputText = outputText.replace(/{{\s*(\$[A-Z_]+)\s*}}/g, (match, varName) => {
+          return getSystemVariableValue(varName) || '';
+      });
+
+      // 2. Resolve conditional blocks
+      const dynamicInputsMap = new Map();
+      document.querySelectorAll('#dynamicInputsContainer input, #dynamicInputsContainer select').forEach(input => {
+          dynamicInputsMap.set(input.dataset.placeholder, input.value);
+      });
+
+      // Process conditionals, using a simple non-nested approach
+      outputText = outputText.replace(/{{#if\s+([a-zA-Z0-9_]+)}}(.*?){{\/if}}/gs, (match, key, content) => {
+          const val = dynamicInputsMap.get(key);
+          return (val !== undefined && val !== null && val !== '') ? content : '';
+      });
+
+      // 3. Resolve standard placeholders
       const placeholders = getPlaceholders(template.body);
-      
       placeholders.forEach(p => {
-          const input = document.getElementById(`dyn-input-${p.name}`);
-          let value = input ? input.value : '';
-          value = value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
+          const value = dynamicInputsMap.get(p.name) || '';
           const regex = new RegExp(`{{\\s*${p.name}(?::[^}]+)?\\s*}}`, 'g');
-          outputHtml = outputHtml.replace(regex, value);
+          outputText = outputText.replace(regex, value);
       });
       
-      responseOutput.innerHTML = outputHtml;
+      responseOutput.innerHTML = outputText;
   }
   
   function saveResponseState() {
@@ -364,13 +413,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const state = { selectedTemplateId, dynamicInputs };
       chrome.storage.local.set({ [STORAGE_KEY_RESPONSE_STATE]: state });
   }
+  
+  function getTopLevelFolders(allFolders) {
+      const topLevel = new Set();
+      allFolders.forEach(path => {
+          topLevel.add(path.split('/')[0]);
+      });
+      return Array.from(topLevel);
+  }
 
-  /**
-   * Builds an in-memory tree structure from the flat folder and template lists.
-   * @param {string[]} folders - A flat list of folder paths (e.g., ['A', 'A/B']).
-   * @param {object[]} templates - The list of all templates.
-   * @returns {object} A map of nodes where `nodeMap.root` is the root of the tree.
-   */
   function buildTree(folders, templates) {
     const tree = { name: 'root', path: null, children: [], templates: [] };
     const nodeMap = { root: tree };
@@ -382,12 +433,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let currentPath = '';
         let parentNode = tree;
 
-        parts.forEach((part) => {
+        parts.forEach((part, index) => {
             const oldPath = currentPath;
             currentPath = oldPath ? `${oldPath}/${part}` : part;
             
             if (!nodeMap[currentPath]) {
-                const newNode = { name: part, path: currentPath, children: [], templates: [] };
+                const newNode = { name: part, path: currentPath, children: [], templates: [], isTopLevel: index === 0 };
                 nodeMap[currentPath] = newNode;
                 parentNode.children.push(newNode);
             }
@@ -396,10 +447,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     templates.forEach(template => {
-        const parentNode = template.folder ? nodeMap[template.folder] : null;
-        if (parentNode) {
-            parentNode.templates.push(template);
-        }
+        const parentNode = template.folder ? nodeMap[template.folder] : tree;
+        parentNode.templates.push(template);
     });
     
     const uncategorizedTemplates = templates.filter(t => !t.folder);
@@ -412,129 +461,154 @@ document.addEventListener('DOMContentLoaded', () => {
         nodeMap['Favorites'] = { name: '★ Favorites', path: null, children: [], templates: favoriteTemplates };
     }
 
-    const sortNodes = (node) => {
-        node.children.sort((a, b) => a.name.localeCompare(b.name));
-        node.children.forEach(sortNodes);
-    };
-    sortNodes(tree);
+    // Preserve top-level folder order from the `folders` array
+    const topLevelOrder = getTopLevelFolders(folders);
+    tree.children.sort((a, b) => {
+        const indexA = topLevelOrder.indexOf(a.name);
+        const indexB = topLevelOrder.indexOf(b.name);
+        if (indexA === -1 || indexB === -1) return a.name.localeCompare(b.name);
+        return indexA - indexB;
+    });
 
     return nodeMap;
   }
 
-  /**
-   * Renders the template browser using a recursive tree-based approach.
-   * @param {object} nodeMap - The map of all nodes generated by `buildTree`.
-   */
+
   function renderTemplateBrowser() {
+    const searchTerm = templateSearchInput.value.toLowerCase().trim();
     templateBrowser.innerHTML = '';
-    const nodeMap = buildTree(folders, templates);
+    
+    const filteredTemplates = templates.filter(t => 
+      t.name.toLowerCase().includes(searchTerm) || 
+      t.body.toLowerCase().includes(searchTerm)
+    );
 
-    const renderFolderNode = (node, container, isRoot = false) => {
-        const folderLi = document.createElement('li');
-        folderLi.className = 'folder-item';
+    // If searching, render a flat list. Otherwise, render the tree.
+    if (searchTerm) {
+        const flatList = document.createElement('ul');
+        if (filteredTemplates.length === 0) {
+            const noResults = document.createElement('li');
+            noResults.className = 'template-item-no-results';
+            noResults.textContent = 'No templates found.';
+            flatList.appendChild(noResults);
+        } else {
+            filteredTemplates
+              .sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0) || a.name.localeCompare(b.name))
+              .forEach(t => {
+                const itemLi = document.createElement('li');
+                itemLi.className = 'template-item';
 
-        const folderHeader = document.createElement('div');
-        folderHeader.className = 'folder-header';
-        
-        const folderNameDiv = document.createElement('div');
-        folderNameDiv.className = 'folder-name';
-        folderNameDiv.textContent = node.name;
-        
-        const folderActions = document.createElement('div');
-        folderActions.className = 'folder-actions';
+                const itemName = document.createElement('span');
+                itemName.textContent = t.name;
 
-        if (!isRoot && node.name !== '★ Favorites' && node.name !== 'Uncategorized') {
-            const currentDepth = node.path ? node.path.split('/').length : 0;
-            if (currentDepth < 5) {
+                const favButton = document.createElement('button');
+                favButton.className = 'favorite-toggle';
+                favButton.classList.toggle('favorited', !!t.isFavorite);
+                favButton.textContent = t.isFavorite ? '★' : '☆';
+                favButton.title = t.isFavorite ? 'Unfavorite' : 'Favorite';
+                favButton.onclick = (e) => { e.stopPropagation(); toggleFavorite(t.id); };
+
+                itemLi.appendChild(itemName);
+                itemLi.appendChild(favButton);
+                
+                itemLi.dataset.templateId = t.id;
+                if (t.id === selectedTemplateId) {
+                    itemLi.classList.add('selected');
+                }
+                itemLi.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectedTemplateId = selectedTemplateId === t.id ? null : t.id;
+                    loadData();
+                });
+                flatList.appendChild(itemLi);
+            });
+        }
+        templateBrowser.appendChild(flatList);
+    } else {
+        const nodeMap = buildTree(folders, templates); // Use all templates for tree view
+        const renderFolderNode = (node, container, isRoot = false, level = 0) => {
+            const folderLi = document.createElement('li');
+            folderLi.className = 'folder-item';
+            const folderHeader = document.createElement('div');
+            folderHeader.className = 'folder-header';
+            const folderNameDiv = document.createElement('div');
+            folderNameDiv.className = 'folder-name';
+            folderNameDiv.textContent = node.name;
+            const folderActions = document.createElement('div');
+            folderActions.className = 'folder-actions';
+
+            const isSpecialFolder = node.name === '★ Favorites' || node.name === 'Uncategorized';
+            if (!isRoot && !isSpecialFolder) {
+                if (node.isTopLevel) {
+                     const upBtn = document.createElement('button');
+                     upBtn.innerHTML = '↑'; upBtn.title = 'Move Up'; upBtn.className = 'folder-action-icon move-icon';
+                     upBtn.onclick = (e) => { e.stopPropagation(); moveFolder(node.path, 'up'); };
+                     folderActions.appendChild(upBtn);
+                     const downBtn = document.createElement('button');
+                     downBtn.innerHTML = '↓'; downBtn.title = 'Move Down'; downBtn.className = 'folder-action-icon move-icon';
+                     downBtn.onclick = (e) => { e.stopPropagation(); moveFolder(node.path, 'down'); };
+                     folderActions.appendChild(downBtn);
+                }
                 const addSubfolderBtn = document.createElement('button');
-                addSubfolderBtn.innerHTML = '➕';
-                addSubfolderBtn.title = 'New Subfolder';
-                addSubfolderBtn.className = 'folder-action-icon';
+                addSubfolderBtn.innerHTML = '➕'; addSubfolderBtn.title = 'New Subfolder'; addSubfolderBtn.className = 'folder-action-icon';
                 addSubfolderBtn.onclick = (e) => { e.stopPropagation(); handleNewFolderClick(node.path); };
                 folderActions.appendChild(addSubfolderBtn);
+                const editBtn = document.createElement('button');
+                editBtn.innerHTML = '✏️'; editBtn.title = 'Rename Folder'; editBtn.className = 'folder-action-icon edit-icon';
+                editBtn.onclick = (e) => { e.stopPropagation(); handleRenameFolder(node.path); };
+                folderActions.appendChild(editBtn);
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '🗑️'; deleteBtn.title = 'Delete Folder'; deleteBtn.className = 'folder-action-icon delete-icon';
+                deleteBtn.onclick = (e) => { e.stopPropagation(); handleDeleteFolder(node.path); };
+                folderActions.appendChild(deleteBtn);
             }
-            
-            const editBtn = document.createElement('button');
-            editBtn.innerHTML = '✏️';
-            editBtn.title = 'Rename Folder';
-            editBtn.className = 'folder-action-icon edit-icon';
-            editBtn.onclick = (e) => { e.stopPropagation(); handleRenameFolder(node.path); };
-            folderActions.appendChild(editBtn);
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.innerHTML = '🗑️';
-            deleteBtn.title = 'Delete Folder';
-            deleteBtn.className = 'folder-action-icon delete-icon';
-            deleteBtn.onclick = (e) => { e.stopPropagation(); handleDeleteFolder(node.path); };
-            folderActions.appendChild(deleteBtn);
-        }
-
-        folderHeader.appendChild(folderNameDiv);
-        folderHeader.appendChild(folderActions);
-        
-        const templateList = document.createElement('ul');
-        templateList.className = 'template-list hidden';
-        
-        folderHeader.onclick = () => {
-            folderNameDiv.classList.toggle('open');
-            templateList.classList.toggle('hidden');
-        };
-
-        node.children.forEach(childNode => renderFolderNode(childNode, templateList));
-        
-        node.templates
-          .sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0) || a.name.localeCompare(b.name))
-          .forEach(t => {
-            const itemLi = document.createElement('li');
-            itemLi.className = 'template-item';
-
-            const itemName = document.createElement('span');
-            itemName.textContent = t.name;
-
-            const favButton = document.createElement('button');
-            favButton.className = 'favorite-toggle';
-            favButton.classList.toggle('favorited', !!t.isFavorite);
-            favButton.textContent = t.isFavorite ? '★' : '☆';
-            favButton.title = t.isFavorite ? 'Unfavorite' : 'Favorite';
-            favButton.onclick = (e) => {
-                e.stopPropagation();
-                toggleFavorite(t.id);
+            folderHeader.appendChild(folderNameDiv);
+            folderHeader.appendChild(folderActions);
+            const contentUl = document.createElement('ul');
+            contentUl.className = 'template-list hidden';
+            folderHeader.onclick = () => {
+                folderNameDiv.classList.toggle('open');
+                contentUl.classList.toggle('hidden');
             };
-
-            itemLi.appendChild(itemName);
-            itemLi.appendChild(favButton);
-            
-            itemLi.dataset.templateId = t.id;
-            if (t.id === selectedTemplateId) {
-                itemLi.classList.add('selected');
-                if (!templateList.classList.contains('open')) {
-                    templateList.classList.remove('hidden');
-                    folderNameDiv.classList.add('open');
+            node.children.forEach(childNode => renderFolderNode(childNode, contentUl, false, level + 1));
+            node.templates
+              .sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0) || a.name.localeCompare(b.name))
+              .forEach(t => {
+                const itemLi = document.createElement('li');
+                itemLi.className = 'template-item';
+                const itemName = document.createElement('span');
+                itemName.textContent = t.name;
+                const favButton = document.createElement('button');
+                favButton.className = 'favorite-toggle';
+                favButton.classList.toggle('favorited', !!t.isFavorite);
+                favButton.textContent = t.isFavorite ? '★' : '☆';
+                favButton.title = t.isFavorite ? 'Unfavorite' : 'Favorite';
+                favButton.onclick = (e) => { e.stopPropagation(); toggleFavorite(t.id); };
+                itemLi.appendChild(itemName);
+                itemLi.appendChild(favButton);
+                itemLi.dataset.templateId = t.id;
+                if (t.id === selectedTemplateId) {
+                    itemLi.classList.add('selected');
+                    if (!contentUl.classList.contains('open')) {
+                        contentUl.classList.remove('hidden');
+                        folderNameDiv.classList.add('open');
+                    }
                 }
-            }
-            itemLi.addEventListener('click', (e) => {
-                e.stopPropagation();
-                selectedTemplateId = selectedTemplateId === t.id ? null : t.id;
-                loadData();
+                itemLi.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectedTemplateId = selectedTemplateId === t.id ? null : t.id;
+                    loadData();
+                });
+                contentUl.appendChild(itemLi);
             });
-            templateList.appendChild(itemLi);
-        });
-        
-        // Always render the folder structure, even if it's empty
-        folderLi.appendChild(folderHeader);
-        folderLi.appendChild(templateList);
-        container.appendChild(folderLi);
-    };
-    
-    // Render Favorites first if it exists
-    if (nodeMap['Favorites']) {
-        renderFolderNode(nodeMap['Favorites'], templateBrowser);
-    }
-    
-    const rootNode = nodeMap.root;
-    rootNode.children.forEach(child => renderFolderNode(child, templateBrowser));
-    if (nodeMap['Uncategorized']) {
-        renderFolderNode(nodeMap['Uncategorized'], templateBrowser);
+            folderLi.appendChild(folderHeader);
+            folderLi.appendChild(contentUl);
+            container.appendChild(folderLi);
+        };
+        if (nodeMap['Favorites']) renderFolderNode(nodeMap['Favorites'], templateBrowser);
+        nodeMap.root.children.forEach(child => renderFolderNode(child, templateBrowser, false, 0));
+        if (nodeMap['Uncategorized']) renderFolderNode(nodeMap['Uncategorized'], templateBrowser);
     }
   }
 
@@ -577,17 +651,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (template) {
           templateNameInput.value = template.name;
           templateFolderSelect.value = template.folder || '';
-          templateBodyInput.value = template.body;
+          templateBodyInput.innerHTML = template.body;
       } else {
           templateNameInput.value = '';
           templateFolderSelect.value = '';
-          templateBodyInput.value = '';
+          templateBodyInput.innerHTML = '';
       }
   }
 
   function saveTemplate() {
     const name = templateNameInput.value.trim();
-    const body = templateBodyInput.value; // Keep whitespace for line breaks
+    const body = templateBodyInput.innerHTML;
     const folderPath = templateFolderSelect.value || null;
     if (!name || !body) {
         alert('Template name and body cannot be empty.');
@@ -636,12 +710,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function handleNewFolderClick(parentPath = null) {
-      const currentDepth = parentPath ? parentPath.split('/').length : 0;
-      if (currentDepth >= 5) {
-          alert("You have reached the maximum subfolder depth of 5.");
-          return;
-      }
-
       const promptMessage = parentPath 
           ? `Enter name for new subfolder in "${parentPath}":` 
           : 'Enter a name for the new top-level folder:';
@@ -707,6 +775,36 @@ document.addEventListener('DOMContentLoaded', () => {
           });
       }
   }
+
+    function moveFolder(path, direction) {
+        const topLevelFolders = getTopLevelFolders(folders);
+        const currentIndex = topLevelFolders.indexOf(path);
+
+        if (direction === 'up' && currentIndex > 0) {
+            [topLevelFolders[currentIndex], topLevelFolders[currentIndex - 1]] = [topLevelFolders[currentIndex - 1], topLevelFolders[currentIndex]];
+        } else if (direction === 'down' && currentIndex < topLevelFolders.length - 1) {
+            [topLevelFolders[currentIndex], topLevelFolders[currentIndex + 1]] = [topLevelFolders[currentIndex + 1], topLevelFolders[currentIndex]];
+        } else {
+            return; // Cannot move further
+        }
+        
+        const newFolders = [];
+        const folderGroups = new Map(topLevelFolders.map(name => [name, []]));
+        
+        folders.forEach(f => {
+            const topLevelName = f.split('/')[0];
+            if (folderGroups.has(topLevelName)) {
+                folderGroups.get(topLevelName).push(f);
+            }
+        });
+
+        topLevelFolders.forEach(name => {
+            newFolders.push(...(folderGroups.get(name) || []));
+        });
+
+        folders = newFolders;
+        chrome.storage.local.set({ [STORAGE_KEY_FOLDERS]: folders }, loadData);
+    }
 
   function exportTemplates() {
       if (templates.length === 0 && folders.length === 0) {
@@ -807,16 +905,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-    function wrapTextInTag(tag) {
-        const start = templateBodyInput.selectionStart;
-        const end = templateBodyInput.selectionEnd;
-        const text = templateBodyInput.value;
-        const selectedText = text.substring(start, end);
-        const newText = `${text.substring(0, start)}<${tag}>${selectedText}</${tag}>${text.substring(end)}`;
-        
-        templateBodyInput.value = newText;
+    function formatDoc(command, value = null) {
+        document.execCommand(command, false, value);
         templateBodyInput.focus();
-        templateBodyInput.selectionEnd = end + (tag.length * 2) + 5; // position cursor after closing tag
+    }
+
+    function updateContextToolbar() {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return;
+      
+      let parent = selection.getRangeAt(0).startContainer;
+      parent = parent.nodeType === Node.ELEMENT_NODE ? parent : parent.parentNode;
+      if (!templateBodyInput.contains(parent)) return;
+
+      // Update link context bar
+      const link = parent.closest('a');
+      if (link) {
+        currentLinkElement = link;
+        linkUrlInput.value = link.getAttribute('href');
+        editorContextBar.classList.remove('hidden');
+      } else {
+        currentLinkElement = null;
+        editorContextBar.classList.add('hidden');
+      }
+      
+      /* --- COMMENTED OUT FONT/FORMAT LOGIC --- */
+      const toolbarFormat = document.getElementById('toolbar-format');
+      if (toolbarFormat) {
+        const block = parent.closest('p, h1, h2, h3, h4, h5, h6');
+        toolbarFormat.value = block ? block.tagName.toLowerCase() : 'p';
+      }
+      
+      const toolbarFont = document.getElementById('toolbar-font');
+      if (toolbarFont) {
+        const computedFont = window.getComputedStyle(parent).fontFamily.split(',')[0].replace(/['"]/g, '').trim();
+        let foundFont = false;
+        for (const option of toolbarFont.options) {
+          if (option.value.toLowerCase().includes(computedFont.toLowerCase())) {
+            toolbarFont.value = option.value;
+            foundFont = true;
+            break;
+          }
+        }
+        if (!foundFont) toolbarFont.selectedIndex = 0;
+      }
+      /* --- END COMMENTED OUT LOGIC --- */
     }
     
     function toggleFavorite(templateId) {
@@ -852,24 +985,24 @@ document.addEventListener('DOMContentLoaded', () => {
   responseToggleBtn.addEventListener('click', () => setView('response'));
 
   [ticketNumberInput, customerRequestInput, customerEmailInput, customerPhoneNumberInput, additionalCommentsInput].forEach(input => {
-    if (input) input.addEventListener('input', () => { updateFormattedOutput(); saveFormatterInputs(); });
+    if (input) input.addEventListener('input', () => { updateFormattedOutput(); saveFormatterInputs(); updateResponseOutput(); });
   });
   if (ticketNumberInput) {
     ticketNumberInput.addEventListener('input', () => {
       if (ticketNumberInput.value.length > 8) ticketNumberInput.value = ticketNumberInput.value.slice(0, 8);
-      updateFormattedOutput(); saveFormatterInputs();
+      updateFormattedOutput(); saveFormatterInputs(); updateResponseOutput();
     });
   }
   if (statusPaidBtn) {
     statusPaidBtn.addEventListener('click', () => {
       statusPaidBtn.classList.add('selected'); statusPostedBtn.classList.remove('selected');
-      updateFormattedOutput(); saveFormatterInputs();
+      updateFormattedOutput(); saveFormatterInputs(); updateResponseOutput();
     });
   }
   if (statusPostedBtn) {
     statusPostedBtn.addEventListener('click', () => {
       statusPaidBtn.classList.remove('selected'); statusPostedBtn.classList.add('selected');
-      updateFormattedOutput(); saveFormatterInputs();
+      updateFormattedOutput(); saveFormatterInputs(); updateResponseOutput();
     });
   }
   if (copyOutputBtn) {
@@ -885,6 +1018,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- New Response Template Listeners ---
   newTemplateBtn.addEventListener('click', handleNewTemplateClick);
   newFolderBtn.addEventListener('click', () => handleNewFolderClick(null));
+  templateSearchInput.addEventListener('input', renderTemplateBrowser);
   saveTemplateBtn.addEventListener('click', saveTemplate);
   deleteTemplateBtn.addEventListener('click', deleteTemplate);
   exportTemplatesBtn.addEventListener('click', exportTemplates);
@@ -899,9 +1033,50 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Toolbar Listeners
-  toolbarBold.addEventListener('click', () => wrapTextInTag('b'));
-  toolbarItalic.addEventListener('click', () => wrapTextInTag('i'));
-  toolbarUnderline.addEventListener('click', () => wrapTextInTag('u'));
+  const toolbarFont = document.getElementById('toolbar-font');
+  const toolbarFormat = document.getElementById('toolbar-format');
+  if (toolbarFont) toolbarFont.addEventListener('change', () => formatDoc('fontName', toolbarFont.value));
+  if (toolbarFormat) toolbarFormat.addEventListener('change', () => formatDoc('formatBlock', toolbarFormat.value));
+  toolbarBold.addEventListener('click', () => formatDoc('bold'));
+  toolbarItalic.addEventListener('click', () => formatDoc('italic'));
+  toolbarUnderline.addEventListener('click', () => formatDoc('underline'));
+  toolbarUl.addEventListener('click', () => formatDoc('insertUnorderedList'));
+  toolbarOl.addEventListener('click', () => formatDoc('insertOrderedList'));
+  toolbarA.addEventListener('click', () => {
+      const selection = window.getSelection();
+      if (!selection.rangeCount || selection.getRangeAt(0).collapsed) {
+          alert('Please highlight the text you want to turn into a link.');
+          return;
+      }
+      const url = prompt('Enter the link URL:', 'https://');
+      if (url) formatDoc('createLink', url);
+  });
+  toolbarColor.addEventListener('input', () => formatDoc('foreColor', toolbarColor.value));
+  toolbarClear.addEventListener('click', () => formatDoc('removeFormat'));
+
+  // Context Bar & Editor State Listeners
+  document.addEventListener('selectionchange', updateContextToolbar);
+  templateBodyInput.addEventListener('keyup', updateContextToolbar);
+  templateBodyInput.addEventListener('click', updateContextToolbar);
+  
+  // FIX: Prevent context bar from stealing focus and allow interaction
+  editorContextBar.addEventListener('mousedown', (e) => {
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+      e.preventDefault(); // Prevent editor from losing selection only if not interacting with an input/button
+    }
+  });
+
+  linkSaveBtn.addEventListener('click', () => {
+    if (currentLinkElement) {
+      currentLinkElement.setAttribute('href', linkUrlInput.value);
+      templateBodyInput.focus();
+    }
+  });
+  linkUnlinkBtn.addEventListener('click', () => {
+    if (currentLinkElement) {
+      formatDoc('unlink');
+    }
+  });
 
 
   // --- Initial Setup ---

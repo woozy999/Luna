@@ -305,7 +305,8 @@ body {
 .input-group textarea,
 .input-group select,
 .line-item input[type="text"],
-.line-item select {
+.line-item select,
+.search-input {
   background-color: var(--primary-bg);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
@@ -319,17 +320,13 @@ body {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-#templateBodyInput {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-}
-
 .input-group input[type="text"]:focus,
 .input-group input[type="number"]:focus,
 .input-group textarea:focus,
 .input-group select:focus,
 .line-item input[type="text"]:focus,
-.line-item select:focus {
+.line-item select:focus,
+.search-input:focus {
   outline: none;
   border-color: var(--primary-accent);
   box-shadow: 0 0 0 3px var(--primary-accent-shadow);
@@ -427,7 +424,6 @@ body {
   font-weight: normal;
 }
 
-/* MODIFIED: This now applies to the div as well */
 #responseOutput {
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -833,7 +829,7 @@ input[type="color"]::-moz-color-swatch {
 }
 .help-icon .tooltip {
   visibility: hidden;
-  width: 200px;
+  width: 220px;
   background-color: #262626;
   color: #fff;
   text-align: left;
@@ -899,21 +895,15 @@ body.theme-dark .footer-button.confirm-action-button:hover {
     background-color: #166534;
 }
 
-/* MODIFIED: Changed delete button style to better match clear button */
+/* MODIFIED: Changed delete button style to be solid red */
 .toggle-button.delete-button-color {
-  background-color: var(--clear-button-bg);
-  color: var(--clear-button-text);
-  border-color: var(--clear-button-bg);
+  background-color: #DC2626;
+  color: #FFFFFF;
+  border-color: #DC2626;
 }
 .toggle-button.delete-button-color:hover {
-  background-color: var(--clear-button-hover-bg);
-  border-color: var(--clear-button-hover-bg);
-}
-body.theme-dark .toggle-button.delete-button-color {
-  border-color: #450a0a;
-}
-body.theme-dark .toggle-button.delete-button-color:hover {
-   border-color: #5f2e2e;
+  background-color: #b91c1c;
+  border-color: #b91c1c;
 }
 
 
@@ -928,6 +918,15 @@ hr.form-divider {
 }
 
 /* --- Template Browser styles --- */
+.template-browser-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.template-browser {
+  max-height: 250px;
+  overflow-y: auto;
+}
 .template-browser ul {
   list-style: none;
   padding-left: 0;
@@ -983,6 +982,7 @@ hr.form-divider {
 }
 .folder-action-icon.edit-icon { color: var(--primary-accent); }
 .folder-action-icon.delete-icon { color: var(--clear-button-text); }
+.folder-action-icon.move-icon { color: var(--text-secondary); }
 
 
 .template-browser .template-list {
@@ -1005,6 +1005,12 @@ hr.form-divider {
   background-color: var(--primary-accent-shadow);
   color: var(--primary-accent);
   font-weight: 500;
+}
+.template-item-no-results {
+  color: var(--text-secondary);
+  padding: 12px;
+  text-align: center;
+  font-style: italic;
 }
 .card-header-actions .action-button {
   background-color: var(--primary-bg);
@@ -1042,7 +1048,8 @@ hr.form-divider {
 /* --- Editor Toolbar --- */
 .editor-toolbar {
     display: flex;
-    gap: 2px;
+    flex-wrap: wrap;
+    gap: 4px;
     background-color: var(--primary-bg);
     border: 1px solid var(--border-color);
     border-bottom: none;
@@ -1050,22 +1057,172 @@ hr.form-divider {
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
 }
-.editor-toolbar button {
+.editor-toolbar button, .toolbar-select, .toolbar-color-picker-label {
     background: var(--secondary-bg);
     border: 1px solid var(--border-color);
     border-radius: 4px;
-    width: 32px;
     height: 32px;
     cursor: pointer;
     color: var(--text-primary);
     transition: background-color 0.2s;
+    font-family: var(--font-sans);
 }
-.editor-toolbar button:hover {
+.editor-toolbar button:hover, .toolbar-select:hover {
     background-color: var(--border-color);
 }
+.editor-toolbar button {
+    min-width: 32px;
+    padding: 0 8px;
+    font-size: 1em;
+}
+.editor-toolbar svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+.toolbar-select {
+  padding: 0 4px;
+}
+.toolbar-color-picker-label {
+  position: relative;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+.toolbar-color-picker-label input[type="color"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
 
-.import-export-section {
+.editor-context-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  background-color: var(--primary-bg);
+  border: 1px solid var(--border-color);
+  border-top: none;
+  border-bottom: none;
+}
+.editor-context-bar span {
+  font-size: 1.2em;
+}
+.editor-context-bar input {
+  flex-grow: 1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: var(--secondary-bg);
+  font-size: 0.9em;
+}
+.editor-context-bar button {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Styles for colored context bar buttons */
+.editor-context-bar .confirm-action-button {
+    background-color: var(--confirm-green-bg);
+    color: var(--confirm-green-text);
+    border: 1px solid var(--confirm-green-bg);
+}
+.editor-context-bar .confirm-action-button:hover {
+    background-color: var(--confirm-green-hover-bg);
+}
+.editor-context-bar .delete-button-color {
+    background-color: #DC2626;
+    color: #FFFFFF;
+    border: 1px solid #DC2626;
+}
+.editor-context-bar .delete-button-color:hover {
+    background-color: #b91c1c;
+}
+
+/* Redesigned Import/Export Section */
+.action-button-group {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    width: 100%;
+    flex-wrap: wrap; /* Fix for responsive layout */
+}
+.action-button-group-item {
+    flex-grow: 1;
+    background-color: var(--secondary-bg);
+    color: var(--text-secondary);
+    padding: 8px;
+    font-size: 0.85em;
+    font-weight: 500;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.action-button-group-item:hover {
+    background-color: var(--primary-bg);
+    color: var(--text-primary);
+}
+.action-button-group-item:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+.action-button-group-item:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+.action-button-group-item:not(:last-child) {
+    border-right: none;
+}
+.action-button-group-item svg {
+  width: 14px;
+  height: 14px;
+}
+
+
+/* --- Content Editable Editor Styles --- */
+.content-editable-editor {
+    background-color: var(--primary-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 1em;
+    width: 100%;
+    min-height: 120px;
+    box-sizing: border-box;
+    resize: vertical;
+    overflow: auto;
+    font-family: var(--font-sans);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.content-editable-editor:focus {
+    outline: none;
+    border-color: var(--primary-accent);
+    box-shadow: 0 0 0 3px var(--primary-accent-shadow);
+}
+
+/* Fix list spacing inside the editor */
+.content-editable-editor ul,
+.content-editable-editor ol {
+    margin: 8px 0;
+    padding-left: 25px;
+}
+
+.content-editable-editor li {
+    margin-bottom: 4px;
 }
